@@ -1,3 +1,9 @@
+/*
+ボールを表現するクラス
+- 位置ベクトル、速度ベクトル、加速度ベクトル、質量、半径を保持
+- Δtに応じて位置、速度を変化させる関数
+*/
+
 class Ball {
     public PVector accelaration, velocity, position;
     public float mass, radius;
@@ -32,7 +38,7 @@ class Ball {
         //まだ力を導入していない
     }
 
-    public void display() {
-        ellipse(position.x, position.y, radius * 2, radius * 2);
+    public void draw() {
+        circle(position.x, position.y, radius * 2);
     }
 }

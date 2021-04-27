@@ -1,14 +1,11 @@
 /*
 自由落下のシミュレーション
-TODO:
-- ボールを表現するクラス
-- 位置ベクトル、速度ベクトル、加速度ベクトル、質量を保持
-- Δtに応じて位置、速度を変化させる関数
 */
 
 final PVector gravity = new PVector(0, 9.8);
 //まだ使っていない
 final float air_resistance = 0;
+final float delta_time = 0.1;
 
 Ball ball;
 
@@ -26,10 +23,6 @@ void setup() {
 
 void draw() {
     background(255);
-    ball.update(0.1);
-    display();
-}
-
-void display() {
-    ball.display();
+    ball.update(delta_time);
+    ball.draw();
 }
