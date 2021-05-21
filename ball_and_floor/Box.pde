@@ -1,16 +1,17 @@
-/* ボールを表現するクラス */
-
-class Ball {
+// 「箱」を表現するクラス
+class Box {
     private PVector position, velocity, accelaration, impulse;
-    private float mass, radius;
+    private float mass, w_len, h_len; // w_len: 横幅、h_len: 縦幅
 
-    public Ball(PVector _position, PVector _velocity, float _mass, float _radius) {
+    // 適当なコンストラクタ
+    public Box(PVector _position, PVector _velocity, float _mass, float _w_len, float _h_len) {
         position = new PVector();
         velocity = new PVector();
         accelaration = new PVector(0, 0);
         impulse = new PVector(0, 0);
         mass = _mass;
-        radius = _radius;
+        w_len = _w_len;
+        h_len = _h_len;
         position.set(_position);
         velocity.set(_velocity);
     }
@@ -20,7 +21,7 @@ class Ball {
     }
 
     public void set_force(PVector force) {
-        accelaration.set(force).div(mass);
+        accelaration = force.copy().div(mass);
     }
 
     public void add_force(PVector force) {
@@ -32,37 +33,63 @@ class Ball {
     }
 
     public PVector get_center() {
-        return position.copy();
+        return position.copy().add(w_len / 2, h_len / 2);
     }
 
     public float get_mass() {
         return mass;
     }
 
+    // pointから四角形に到達するのに最も近いベクトル
+    // contains(point) == trueの場合、PVector(0, 0)
     public PVector closest_vector(PVector point) {
-        PVector sub = PVector.sub(point, position);
-        float mag = sub.mag();
-        return mag <= radius ? new PVector(0, 0) : sub.mult((mag - radius) / mag);
+        return new PVector(
+            point.x < position.x ? point.x - position.x
+            : point.x <= position.x + w_len ? 0
+            : point.x - (position.x + w_len),
+            point.y < position.y ? point.y - position.y
+            : point.y <= position.y + h_len ? 0
+            : point.y - (position.y + h_len)
+        );
     }
 
+    // 座標を含んでいるか判定する関数
     public boolean contains(float x, float y) {
-        return pow(position.x - x, 2) + pow(position.y - y, 2) <= pow(radius, 2);
+        return (
+            position.x <= x && x <= position.x + w_len
+            && position.y <= y && y <= position.x + h_len
+        );
     }
     public boolean contains(PVector point) {
-        return position.dist(point) <= radius;
+        return contains(point.x, point.y);
     }
 
-    public boolean is_collide(Ball other) {
-        return other.closest_vector(position).mag() <= radius;
-    }
+    // 衝突判定の関数
+    // いつか共通のinterfaceを作って一般化したい
     public boolean is_collide(Box other) {
-        return other.closest_vector(position).mag() <= radius;
+        PVector cv = other.closest_vector(get_center());
+        return (
+            abs(cv.x) <= w_len / 2
+            && abs(cv.y) <= h_len / 2
+        );
+    }
+    public boolean is_collide(Ball other) {
+        PVector cv = other.closest_vector(get_center());
+        return (
+            abs(cv.x) <= w_len / 2
+            && abs(cv.y) <= h_len / 2
+        );
     }
     public boolean is_collide(Floor other) {
-        return other.closest_vector(position).mag() <= radius;
+        PVector cv = other.closest_vector(get_center());
+        return (
+            abs(cv.x) <= w_len / 2
+            && abs(cv.y) <= h_len / 2
+        );
     }
 
-    Effect effect_on(Ball other) {
+    // 「影響」の関数
+    public Effect effect_on(Box other) {
         PVector dir_e = closest_vector(other.get_center()).normalize();
 
         PVector impulse_ = new PVector(0, 0);
@@ -91,7 +118,7 @@ class Ball {
         return new Effect(force_, impulse_);
     }
 
-    Effect effect_on(Box other) {
+    public Effect effect_on(Ball other) {
         PVector dir_e = closest_vector(other.get_center()).normalize();
 
         PVector impulse_ = new PVector(0, 0);
@@ -120,7 +147,7 @@ class Ball {
         return new Effect(force_, impulse_);
     }
 
-    Effect effect_on(Floor other) {
+    public Effect effect_on(Floor other) {
         PVector dir_e = closest_vector(other.get_center()).normalize();
 
         PVector impulse_ = new PVector(0, 0);
@@ -163,6 +190,6 @@ class Ball {
     }
 
     public void draw() {
-        circle(position.x, position.y, radius * 2);
+        rect(position.x, position.y, w_len, h_len);
     }
 }
