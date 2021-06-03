@@ -28,5 +28,5 @@ void draw() {
         fill(255);
     }
     draw_circle(center);
-    draw_circle(miuse);
+    draw_circle(mouse);
 }

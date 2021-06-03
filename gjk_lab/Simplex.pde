@@ -15,12 +15,20 @@ class Simplex extends Convex {
         point3.set(p3);
     }
 
+    @Override
+    public PVector support(PVector point) {
+        PVector res = point1;
+        if (res.dot(point) < point2.dot(point)) { res = point2; }
+        if (res.dot(point) < point3.dot(point)) { res = point3; }
+        return res.copy();
+    }
+
     public boolean contains(PVector point) {
         PVector edge1 = PVector.sub(point2, point1),  // point1からpoint2へのベクトル
                 edge2 = PVector.sub(point3, point1),  // point1からpoint3へのベクトル
-                p = PVector.sub(point,  point1);      // point1からpoint へのベクトル
-        PVector normal1 = PVector(edge1.y, -edge1.x), // edge1の法線ベクトル
-                normal2 = PVector(edge2.y, -edge2.x); // edge2の法線ベクトル
+                p = PVector.sub(point, point1);      // point1からpoint へのベクトル
+        PVector normal1 = new PVector(edge1.y, -edge1.x), // edge1の法線ベクトル
+                normal2 = new PVector(edge2.y, -edge2.x); // edge2の法線ベクトル
         float   e1n2 = edge1.dot(normal2),
                 e2n1 = edge2.dot(normal1),
                 p_n2 = p.dot(normal2),
