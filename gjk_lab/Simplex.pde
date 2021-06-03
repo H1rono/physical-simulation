@@ -15,12 +15,11 @@ class Simplex extends Convex {
         point3.set(p3);
     }
 
-    @Override
-    public PVector support(PVector point) {
-        PVector res = point1;
-        if (res.dot(point) < point2.dot(point)) { res = point2; }
-        if (res.dot(point) < point3.dot(point)) { res = point3; }
-        return res.copy();
+    public boolean is_triangle() {
+        PVector edge1 = PVector.sub(point2, point1),
+                edge2 = PVector.sub(point3, point1),
+                normal1 = new PVector(edge1.y, -edge1.x);
+        return edge2.dot(normal1) != 0;
     }
 
     public boolean contains(PVector point) {
@@ -41,5 +40,13 @@ class Simplex extends Convex {
         // p = m1 * edge1 + m2 * edge2
         float m1 = p_n2 / e1n2, m2 = p_n1 / e2n1;
         return m1 > 0 && m2 > 0 && m1 + m2 <= 1;
+    }
+
+    @Override
+    public PVector support(PVector point) {
+        PVector res = point1;
+        if (res.dot(point) < point2.dot(point)) { res = point2; }
+        if (res.dot(point) < point3.dot(point)) { res = point3; }
+        return res.copy();
     }
 }

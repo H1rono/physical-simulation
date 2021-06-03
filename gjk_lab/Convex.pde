@@ -20,14 +20,14 @@ abstract class Convex {
         if (smp.point2.x == 0 && smp.point2.y == 0) { return true; }
         PVector v2 = new PVector(0, 0);
         // 時間制限つき
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < 50; ++i) {
             // smp.point1, smp.point2を結ぶ直線と垂直な方向v2
             v2.set(PVector.sub(smp.point2, smp.point1));
             v2.set(v2.y, -v2.x);
             // v2はsmp.point1との内積が負のものを採用する
             if (v2.dot(smp.point1) > 0) { v2.mult(-1); }
             smp.point3.set(support(v2));
-            if (v2.dot(smp.point3) < 0) { return false; }
+            if (v2.dot(smp.point3) < 0 || !smp.is_triangle()) { return false; }
             if (smp.contains(new PVector(0, 0))) { return true; }
             // 原点から最も遠い点を削除
             float mp0 = smp.point1.magSq(), mp1 = smp.point2.magSq(), mp2 = smp.point3.magSq();
