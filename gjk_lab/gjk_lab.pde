@@ -1,4 +1,5 @@
-Circle mouse, center;
+Rectangle center;
+Circle mouse;
 
 void draw_circle(Circle c) {
     PVector cent = c.get_center();
@@ -15,7 +16,7 @@ PVector get_mouse() {
 void setup() {
     size(720, 720);
     mouse = new Circle(new PVector(0, 0), 50);
-    center = new Circle(new PVector(width / 2, height / 2), 50);
+    center = new Rectangle(new PVector(width / 2 - 50, height / 2 - 50), 100, 100);
 }
 
 void draw() {
@@ -27,6 +28,6 @@ void draw() {
     } else {
         fill(255);
     }
-    draw_circle(center);
+    center.draw();
     draw_circle(mouse);
 }
