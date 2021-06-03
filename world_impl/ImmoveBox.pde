@@ -1,51 +1,45 @@
-class Box implements PhysicalObj {
-    private PVector position, velocity, accelaration, impulse;
-    private float mass, w_len, h_len; // w_len: 横幅、h_len: 縦幅
+public class ImmoveBox implements PhysicalObj {
+    private PVector position;
+    private float w_len, h_len;
 
-    // 適当なコンストラクタ
-    public Box(PVector _position, PVector _velocity, float _mass, float _w_len, float _h_len) {
-        position = new PVector();
-        velocity = new PVector();
-        accelaration = new PVector(0, 0);
-        impulse = new PVector(0, 0);
-        mass = _mass;
+    public ImmoveBox(PVector _position, float _w_len, float _h_len) {
+        position = new PVector(0, 0);
+        position.set(_position);
         w_len = _w_len;
         h_len = _h_len;
-        position.set(_position);
-        velocity.set(_velocity);
     }
 
     @Override
     public PVector get_force() {
-        return accelaration.copy().mult(mass);
+        return new PVector(0, 0);
     }
 
     @Override
     public void set_force(PVector force) {
-        accelaration = force.copy().div(mass);
+        // do nothing
     }
 
     @Override
     public void add_force(PVector force) {
-        accelaration.add(force.copy().div(mass));
+        // do nothing
     }
 
     @Override
     public PVector get_velocity() {
-        return velocity.copy();
+        return new PVector(0, 0);
     }
 
     @Override
     public PVector get_center() {
+        // 他のオブジェクトとの位置関係はclosest_vectorで調べられるからテキトー
         return position.copy().add(w_len / 2, h_len / 2);
     }
 
     @Override
     public float get_mass() {
-        return mass;
+        return 0;
     }
 
-    // pointから四角形に到達するのに最も近いベクトル
     @Override
     public PVector closest_vector(float x, float y) {
         return new PVector(
@@ -62,7 +56,6 @@ class Box implements PhysicalObj {
         return closest_vector(point.x, point.y);
     }
 
-    // 衝突判定の関数
     @Override
     public boolean is_collide(PhysicalObj other) {
         PVector cv = other.closest_vector(get_center());
@@ -72,7 +65,6 @@ class Box implements PhysicalObj {
         );
     }
 
-    // 「影響」の関数
     @Override
     public Effect effect_on(PhysicalObj other) {
         PVector dir_e = closest_vector(other.get_center()).normalize();
@@ -97,8 +89,8 @@ class Box implements PhysicalObj {
         PVector force_ = new PVector(0, 0);
         {
             float this_f = dir_e.dot(this.get_force());
-            float other_f = dir_e.dot(other.get_force());
-            force_.add(dir_e).mult(min(this_f - other_f, 0));
+            float ball_f = dir_e.dot(other.get_force());
+            force_.add(dir_e).mult(min(this_f - ball_f, 0));
             // TODO: 摩擦
         }
 
@@ -107,17 +99,12 @@ class Box implements PhysicalObj {
 
     @Override
     public void add_effect(Effect effect) {
-        add_force(effect.force);
-        impulse.add(effect.impulse);
+        // do nothing
     }
 
     @Override
     public void update(float delta_time) {
-        velocity
-            .add(impulse.div(mass))
-            .add(accelaration.copy().mult(delta_time));
-        position.add(velocity.copy().mult(delta_time));
-        impulse.set(0, 0);
+        // do nothing
     }
 
     @Override

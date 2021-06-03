@@ -6,11 +6,26 @@ void setup() {
     // World(gravity, air_resistance, delta_time)
     world = new World(new PVector(0, 10), 0, 0.05);
     // Ball(position, velocity, mass, radius)
-    world.add_obj(new Ball(new PVector(width / 2, 100), new PVector(0, 0), 10, 20));
-    world.add_obj(new Ball(new PVector(width / 2, height / 2), new PVector(0, 0), 10, 20));
+    // Box(position, velocity, mass, w_len, h_len)
+    world.add_obj(new Box(new PVector(100, 560), new PVector(0, 0), 100, 60, 40));
+    world.add_obj(new Box(new PVector(130, 539), new PVector(0, 0), 10, 30, 20));
     // Floor(height)
     world.add_obj(new Floor(600));
 }
+
+/*
+        +------------------+
+        |                  |         Box1
+        |                  |
+        +------------------+
+    +--------------------------+
+    |                          |
+    |                          |
+    |                          |     Box2
+    |                          |
+    +--------------------------+
+------------------------------------ Floor
+*/
 
 void draw() {
     background(255);
