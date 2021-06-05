@@ -1,11 +1,6 @@
 Rectangle center;
 Circle mouse;
 
-void draw_circle(Circle c) {
-    PVector cent = c.get_center();
-    circle(cent.x, cent.y, c.get_radius() * 2);
-}
-
 PVector get_mouse() {
     return new PVector(
         max(0, min(width, mouseX)),
@@ -22,12 +17,14 @@ void setup() {
 void draw() {
     background(255);
     mouse.set_center(get_mouse());
-    if (new MinkowskiDiff(mouse, center).contains_origin()) {
+    center.rotate_by(0.01);
+    Box m_aabb = mouse.get_aabb(), c_aabb = center.get_aabb();
+    if (m_aabb.is_collide(c_aabb) && new MinkowskiDiff(mouse, center).contains_origin()) {
         // 衝突
         fill(255, 0, 0);
     } else {
         fill(255);
     }
     center.draw();
-    draw_circle(mouse);
+    mouse.draw();
 }

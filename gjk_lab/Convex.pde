@@ -1,6 +1,11 @@
 // 凸包
 abstract class Convex {
-    abstract public PVector support(PVector direction);
+    public abstract float min_x();
+    public abstract float max_x();
+    public abstract float min_y();
+    public abstract float max_y();
+
+    public abstract PVector support(PVector direction);
 
     public PVector support(float x, float y) {
         return support(new PVector(x, y));
@@ -41,5 +46,11 @@ abstract class Convex {
             }
         }
         return false;
+    }
+
+    // axis aligned bounding box を得る
+    public Box get_aabb() {
+        float mi_x = min_x(), ma_x = max_x(), mi_y = min_y(), ma_y = max_y();
+        return new Box(new PVector(mi_x, mi_y), ma_x - mi_x, ma_y - mi_y);
     }
 }

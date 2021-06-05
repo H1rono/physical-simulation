@@ -1,5 +1,5 @@
 // 2次元単体、つまり三角形
-class Simplex extends Convex {
+class Simplex {
     public PVector point1, point2, point3;
 
     public Simplex() {
@@ -40,13 +40,5 @@ class Simplex extends Convex {
         // p = m1 * edge1 + m2 * edge2
         float m1 = p_n2 / e1n2, m2 = p_n1 / e2n1;
         return m1 > 0 && m2 > 0 && m1 + m2 <= 1;
-    }
-
-    @Override
-    public PVector support(PVector point) {
-        PVector res = point1;
-        if (res.dot(point) < point2.dot(point)) { res = point2; }
-        if (res.dot(point) < point3.dot(point)) { res = point3; }
-        return res.copy();
     }
 }
