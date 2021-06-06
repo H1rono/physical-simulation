@@ -52,8 +52,8 @@ class Rectangle extends Convex implements Drawable {
     public float min_x() {
         float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
         return center.x + min(
-            min(-w * c - h * s, w * c - h * s), // v1, v2
-            min(w * c + h * s, -w * c + h * s)  // v3, v4
+            min(-w * c - h * s,  w * c - h * s), // v1, v2
+            min( w * c + h * s, -w * c + h * s)  // v3, v4
         );
     }
     @Override

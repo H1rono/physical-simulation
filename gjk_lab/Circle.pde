@@ -8,38 +8,24 @@ class Circle extends Convex implements Drawable {
         radius = rad;
     }
 
-    public float get_radius() {
-        return radius;
-    }
+    public float get_radius() { return radius; }
+    public void set_radius(float r) { radius = r; }
 
-    public void set_center(float r) {
-        radius = r;
-    }
+    public PVector get_center() { return center; }
 
-    public PVector get_center() {
-        return center;
-    }
+    public void set_center(PVector c) { center.set(c); }
 
-    public void set_center(PVector c) {
-        center.set(c);
-    }
+    public PVector set_center(float x, float y) { return center.set(x, y); }
 
-    public PVector set_center(float x, float y) {
-        return center.set(x, y);
-    }
+    @Override
+    public float min_x() { return center.x - radius; }
+    @Override
+    public float max_x() { return center.x + radius; }
 
-    public float min_x() {
-        return center.x - radius;
-    }
-    public float max_x() {
-        return center.x + radius;
-    }
-    public float min_y() {
-        return center.y - radius;
-    }
-    public float max_y() {
-        return center.y + radius;
-    }
+    @Override
+    public float min_y() { return center.y - radius; }
+    @Override
+    public float max_y() { return center.y + radius; }
 
     @Override
     public PVector support(PVector point) {
