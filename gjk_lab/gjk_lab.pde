@@ -18,19 +18,13 @@ void draw() {
     background(255);
     mouse.set_center(get_mouse());
     center.rotate_by(0.01);
-    PVector contact = new PVector(0, 0);
-    if (mouse.aabb_collide(center)) {
-        contact.set(contact_normal(mouse, center));
-        if (contact.x == 0 && contact.y == 0) {
-            fill(255);
-        } else {
-            fill(255, 0, 0);
-            contact.add(mouse.get_center());
-        }
+    ConvexRelation relation = makeRelation(mouse, center);
+    if (relation.collision) {
+        fill(255, 0, 0);
+        mouse.get_center().sub(relation.contact_normal);
     } else {
         fill(255);
     }
     mouse.draw();
     center.draw();
-    circle(contact.x, contact.y, 10);
 }

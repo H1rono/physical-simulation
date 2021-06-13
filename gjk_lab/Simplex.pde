@@ -1,33 +1,34 @@
 // 2次元単体、つまり三角形
 class Simplex {
-    public PVector point1, point2, point3;
+    public PVector vertex1, vertex2, vertex3;
 
     public Simplex() {
-        point1 = new PVector(0, 0);
-        point2 = new PVector(0, 0);
-        point3 = new PVector(0, 0);
+        vertex1 = new PVector(0, 0);
+        vertex2 = new PVector(0, 0);
+        vertex3 = new PVector(0, 0);
     }
 
     public Simplex(PVector p1, PVector p2, PVector p3) {
         this();
-        point1.set(p1);
-        point2.set(p2);
-        point3.set(p3);
+        vertex1.set(p1);
+        vertex2.set(p2);
+        vertex3.set(p3);
     }
 
     public boolean is_triangle() {
-        PVector edge1 = PVector.sub(point2, point1),
-                edge2 = PVector.sub(point3, point1),
+        PVector edge1 = PVector.sub(vertex2, vertex1),
+                edge2 = PVector.sub(vertex3, vertex1),
                 normal1 = new PVector(edge1.y, -edge1.x);
         return edge2.dot(normal1) != 0;
     }
 
     public boolean contains(PVector point) {
-        PVector edge1 = PVector.sub(point2, point1),  // point1からpoint2へのベクトル
-                edge2 = PVector.sub(point3, point1),  // point1からpoint3へのベクトル
-                p = PVector.sub(point, point1);      // point1からpoint へのベクトル
+        PVector edge1 = PVector.sub(vertex2, vertex1),  // vertex1からvertex2へのベクトル
+                edge2 = PVector.sub(vertex3, vertex1),  // vertex1からvertex3へのベクトル
+                p = PVector.sub(point, vertex1);      // vertex1からpoint へのベクトル
         PVector normal1 = new PVector(edge1.y, -edge1.x), // edge1の法線ベクトル
                 normal2 = new PVector(edge2.y, -edge2.x); // edge2の法線ベクトル
+        // 内積たち
         float   e1n2 = edge1.dot(normal2),
                 e2n1 = edge2.dot(normal1),
                 p_n2 = p.dot(normal2),
@@ -42,40 +43,36 @@ class Simplex {
         return m1 > 0 && m2 > 0 && m1 + m2 <= 1;
     }
 
-    // 単体の辺上の点で、原点に最も近い点を求める
+    // 原点から単体の辺上まで最短のベクトル
     public PVector contact(PVector point) {
-        PVector normal_p = new PVector(-point.y, point.x);
-        PVector v12 = PVector.sub(point1, point2), v23 = PVector.sub(point2, point3), v31 = PVector.sub(point3, point1);
-        float dist1 = point1.magSq(), dist2 = point2.magSq(), dist3 = point3.magSq();
-        float dist12 = pow(v12.dot(normal_p) + point1.dot(point2.y, -point2.x, 0), 2) / v12.magSq(),
-            dist23   = pow(v23.dot(normal_p) + point2.dot(point3.y, -point3.x, 0), 2) / v23.magSq(),
-            dist31   = pow(v31.dot(normal_p) + point3.dot(point1.y, -point1.x, 0), 2) / v31.magSq();
-        float dist_min = min(
-            min(dist1,  min(dist2,  dist3)),
-            min(dist12, min(dist23, dist31))
-        );
+        return contact_normal(new PVector(0, 0));
+    }
 
-        if (dist_min == dist1) {
-            return point1;
-        } else if (dist_min == dist2) {
-            return point2;
-        } else if (dist_min == dist3) {
-            return point3;
-        } else if (dist_min == dist12) {
-            PVector normal12 = new PVector(v12.y, -v12.x);
-            normal12.normalize().mult(sqrt(dist12)).add(point);
-            if (normal12.dot(point1) < 0) { normal12.mult(-1); }
-            return normal12;
-        } else if (dist_min == dist23) {
-            PVector normal23 = new PVector(v23.y, -v23.x);
-            normal23.normalize().mult(sqrt(dist23)).add(point);
-            if (normal23.dot(point2) < 0) { normal23.mult(-1); }
-            return normal23;
+    // pointから単体の辺上まで最短のベクトル
+    public PVector contact_normal(PVector point) {
+        PVector vertices[] = new PVector[] {vertex1, vertex2, vertex3};
+        int num_vert = 3;
+        PVector vert1 = PVector.sub(vertices[0], point),
+                vert2 = PVector.sub(vertices[num_vert - 1], point);
+        PVector v21 = PVector.sub(vert1, vert2); // vert2 -> vert1
+        float ratio = vert1.dot(v21) / v21.magSq();
+        // result = vert1 + ratio * (vert2 - vert1)    <---- if 0 <= ratio <= 1
+        // result = vert1                              <---- if ratio < 0
+        // result = vert2                              <---- if 1 < ratio
+        PVector result = PVector.add(vert1, v21.mult(max(min(ratio, 1), 0) - 1));
+        float dist = result.magSq();
+        for (int i = 1; i < num_vert; ++i) {
+            vert2.set(vert1);
+            vert1.set(vertices[i]).sub(point);
+            v21.set(vert1).sub(vert2);
+            ratio = vert1.dot(v21) / v21.magSq();
+            PVector res = PVector.add(vert1, v21.mult(max(min(ratio, 1), 0) - 1));
+            float d = res.magSq();
+            if (d < dist) {
+                dist = d;
+                result.set(res);
+            }
         }
-        // else
-        PVector normal31 = new PVector(v31.y, -v31.x);
-        normal31.normalize().mult(sqrt(dist31)).add(point);
-        if (normal31.dot(point3) < 0) { normal31.mult(-1); }
-        return normal31;
+        return result.mult(-1);
     }
 }
