@@ -54,6 +54,12 @@ class Circle extends WorldElement {
     }
 
     @Override
+    public void update(float delta_time) {
+        center.add(PVector.mult(velocity, delta_time));
+        velocity.add(PVector.mult(accelaration, delta_time));
+    }
+
+    @Override
     public void draw() {
         circle(center.x, center.y, radius * 2);
     }

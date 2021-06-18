@@ -1,5 +1,5 @@
-class Box extends WorldElement {
-    private PVector center, velocity, accelaration, impulse;
+class ImmoveBox extends WorldElement {
+    private PVector center;
     private float w_len, h_len, rotation, mass;
 
     /*
@@ -23,57 +23,51 @@ class Box extends WorldElement {
     v4 - center = d4 * R = (-w * c - h * (-s), -w * s - h * c)
     */
 
-    public Box(PVector cen, float w, float h, float m) {
+    public ImmoveBox(PVector cen, float w, float h, float r) {
         center = new PVector(0, 0);
-        velocity = new PVector(0, 0);
-        accelaration = new PVector(0, 0);
         center.set(cen);
         w_len = abs(w);
         h_len = abs(h);
-        rotation = 0;
-        mass = m;
+        rotation = r;
+    }
+
+    public ImmoveBox(PVector cen, float w, float h) {
+        this(cen, w, h, 0);
     }
 
     public PVector get_center() { return center; }
-    public void set_center(PVector cen) { center.set(cen); }
 
     public float get_width() { return w_len; }
-    public void set_width(float w) { w_len = abs(w); }
-
     public float get_height() { return h_len; }
-    public void set_height(float h) { h_len = abs(h); }
-
     public float get_rotation() { return rotation; }
-    public void set_rotation(float r) { rotation = r; }
-    public void rotate_by(float r) { rotation += r; }
 
     @Override
-    public PVector get_velocity() { return velocity; }
+    public PVector get_velocity() { return new PVector(0, 0); }
 
     @Override
-    public PVector get_accelaration() { return accelaration; }
+    public PVector get_accelaration() { return new PVector(0, 0); }
 
     @Override
-    public float get_mass() { return mass; }
+    public float get_mass() { return 0; }
 
     @Override
     public void reset_force(PVector force) {
-        accelaration.set(force).div(mass);
+        // do nothing
     }
 
     @Override
     public void add_force(PVector force) {
-        accelaration.add(PVector.div(force, mass));
+        // do nothing
     }
 
     @Override
     public void reset_impulse(PVector impulse) {
-        this.impulse.set(impulse);
+        // do nothing
     }
 
     @Override
     public void add_impulse(PVector impulse) {
-        this.impulse.add(impulse);
+        // do nothing
     }
 
     @Override
@@ -126,8 +120,7 @@ class Box extends WorldElement {
 
     @Override
     public void update(float delta_time) {
-        center.add(PVector.mult(velocity, delta_time));
-        velocity.add(PVector.mult(accelaration, delta_time));
+        // do nothing
     }
 
     @Override
