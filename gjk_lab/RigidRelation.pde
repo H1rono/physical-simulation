@@ -1,20 +1,20 @@
-class ConvexRelation {
-    public Convex convex1, convex2;
+class RigidRelation {
+    public Rigid rigid1, rigid2;
     public boolean collision;
     public PVector contact_normal;
 
-    public ConvexRelation(Convex cnv1, Convex cnv2, boolean col, PVector normal) {
-        convex1 = cnv1;
-        convex2 = cnv2;
+    public RigidRelation(Rigid cnv1, Rigid cnv2, boolean col, PVector normal) {
+        rigid1 = cnv1;
+        rigid2 = cnv2;
         collision = col;
         contact_normal = normal;
     }
 }
 
-ConvexRelation make_relation(Convex convex1, Convex convex2) {
+RigidRelation make_relation(Rigid rigid1, Rigid rigid2) {
     // http://angra.blog31.fc2.com/blog-entry-115.html
-    ConvexRelation relation = new ConvexRelation(convex1, convex2, false, new PVector(0, 0));
-    Convex minkowski_diff = new MinkowskiDiff(convex1, convex2);
+    RigidRelation relation = new RigidRelation(rigid1, rigid2, false, new PVector(0, 0));
+    Rigid minkowski_diff = new MinkowskiDiff(rigid1, rigid2);
 
     // GJK法
     Simplex smp = new Simplex();
