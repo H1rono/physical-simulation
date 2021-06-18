@@ -1,6 +1,6 @@
-class Rectangle extends Convex implements Drawable {
-    private PVector center;
-    private float w_len, h_len, rotation;
+class Box extends WorldElement {
+    private PVector center, velocity, accelaration, impulse;
+    private float w_len, h_len, rotation, mass;
 
     /*
     rotation == 0:
@@ -23,15 +23,18 @@ class Rectangle extends Convex implements Drawable {
     v4 - center = d4 * R = (-w * c - h * (-s), -w * s - h * c)
     */
 
-    public Rectangle(PVector cen, float w, float h, float r) {
+    public Box(PVector cen, float w, float h, float m) {
         center = new PVector(0, 0);
+        velocity = new PVector(0, 0);
+        accelaration = new PVector(0, 0);
         center.set(cen);
         w_len = abs(w);
         h_len = abs(h);
-        rotation = r;
+        rotation = 0;
+        mass = m;
     }
 
-    public Rectangle(PVector cen, float w, float h) {
+    public Box(PVector cen, float w, float h) {
         this(cen, w, h, 0);
     }
 
@@ -47,6 +50,35 @@ class Rectangle extends Convex implements Drawable {
     public float get_rotation() { return rotation; }
     public void set_rotation(float r) { rotation = r; }
     public void rotate_by(float r) { rotation += r; }
+
+    @Override
+    public PVector get_velocity() { return velocity; }
+
+    @Override
+    public PVector get_accelaration() { return accelaration; }
+
+    @Override
+    public float get_mass() { return mass; }
+
+    @Override
+    public void reset_force(PVector force) {
+        accelaration.set(force).div(mass);
+    }
+
+    @Override
+    public void add_force(PVector force) {
+        accelaration.add(PVector.div(force, mass));
+    }
+
+    @Override
+    public void reset_impulse(PVector impulse) {
+        this.impulse.set(impulse);
+    }
+
+    @Override
+    public void add_impulse(PVector impulse) {
+        this.impulse.add(impulse);
+    }
 
     @Override
     public float min_x() {
