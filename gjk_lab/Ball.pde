@@ -1,12 +1,15 @@
-class Circle extends WorldElement {
+class Ball extends WorldElement {
     private PVector center, velocity, accelaration, impulse;
     private float radius, mass;
 
-    public Circle(PVector c, float rad, float mas) {
+    public Ball(PVector _center, float _radius, float _mass) {
         center = new PVector(0, 0);
-        center.set(c);
-        radius = rad;
-        mass = mas;
+        center.set(_center);
+        radius = _radius;
+        mass = _mass;
+        velocity = new PVector(0, 0);
+        accelaration = new PVector(0, 0);
+        impulse = new PVector(0, 0);
     }
 
     public float get_radius() { return radius; }
@@ -16,7 +19,6 @@ class Circle extends WorldElement {
     public void set_center(PVector c) { center.set(c); }
     public PVector set_center(float x, float y) { return center.set(x, y); }
 
-    public PVector get_center() { return center; }
     public PVector get_velocity() { return velocity; }
     public PVector get_accelaration() { return accelaration; }
 
@@ -54,7 +56,11 @@ class Circle extends WorldElement {
     }
 
     @Override
+    public boolean is_movable() { return true; }
+
+    @Override
     public void update(float delta_time) {
+        velocity.add(PVector.div(impulse, mass));
         center.add(PVector.mult(velocity, delta_time));
         velocity.add(PVector.mult(accelaration, delta_time));
     }

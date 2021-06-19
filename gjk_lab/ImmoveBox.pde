@@ -23,16 +23,16 @@ class ImmoveBox extends WorldElement {
     v4 - center = d4 * R = (-w * c - h * (-s), -w * s - h * c)
     */
 
-    public ImmoveBox(PVector cen, float w, float h, float r) {
+    public ImmoveBox(PVector _center, float _w_len, float _h_len, float _rotation) {
         center = new PVector(0, 0);
-        center.set(cen);
-        w_len = abs(w);
-        h_len = abs(h);
-        rotation = r;
+        center.set(_center);
+        w_len = abs(_w_len);
+        h_len = abs(_h_len);
+        rotation = _rotation;
     }
 
-    public ImmoveBox(PVector cen, float w, float h) {
-        this(cen, w, h, 0);
+    public ImmoveBox(PVector _center, float _w_len, float _h_len) {
+        this(_center, _w_len, _h_len, 0);
     }
 
     public PVector get_center() { return center; }
@@ -90,7 +90,7 @@ class ImmoveBox extends WorldElement {
     @Override
     public float min_y() {
         float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
-        return center.x + min(
+        return center.y + min(
             min(-w * s + h * c,  w * s + h * c), // v1, v2
             min( w * s - h * c, -w * s - h * c)  // v3, v4
         );
@@ -98,11 +98,14 @@ class ImmoveBox extends WorldElement {
     @Override
     public float max_y() {
         float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
-        return center.x + max(
+        return center.y + max(
             max(-w * s + h * c,  w * s + h * c), // v1, v2
             max( w * s - h * c, -w * s - h * c)  // v3, v4
         );
     }
+
+    @Override
+    public boolean is_movable() { return false; }
 
     @Override
     public PVector support(PVector point) {

@@ -96,7 +96,7 @@ class Box extends WorldElement {
     @Override
     public float min_y() {
         float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
-        return center.x + min(
+        return center.y + min(
             min(-w * s + h * c,  w * s + h * c), // v1, v2
             min( w * s - h * c, -w * s - h * c)  // v3, v4
         );
@@ -104,11 +104,14 @@ class Box extends WorldElement {
     @Override
     public float max_y() {
         float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
-        return center.x + max(
+        return center.y + max(
             max(-w * s + h * c,  w * s + h * c), // v1, v2
             max( w * s - h * c, -w * s - h * c)  // v3, v4
         );
     }
+
+    @Override
+    public boolean is_movable() { return true; }
 
     @Override
     public PVector support(PVector point) {
