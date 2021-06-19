@@ -1,30 +1,22 @@
-Rectangle center;
-Circle mouse;
-
-PVector get_mouse() {
-    return new PVector(
-        max(0, min(width, mouseX)),
-        max(0, min(height, mouseY))
-    );
-}
+World world;
 
 void setup() {
     size(720, 720);
-    mouse = new Circle(new PVector(0, 0), 50);
-    center = new Rectangle(new PVector(width / 2 - 50, height / 2 - 50), 100, 100);
+    world = new World(new PVector(0, 9.8));
+    world.add_element(new Ball(
+        new PVector(100, 100),
+        50, 10
+    ));
+    world.add_element(new ImmoveBox(
+        new PVector(width / 2, height - 100),
+        width, 100
+    ));
 }
 
 void draw() {
+    // デバッグ用
+    if (!keyPressed) { return; }
     background(255);
-    mouse.set_center(get_mouse());
-    center.rotate_by(0.01);
-    ConvexRelation relation = makeRelation(mouse, center);
-    if (relation.collision) {
-        fill(255, 0, 0);
-        mouse.get_center().sub(relation.contact_normal);
-    } else {
-        fill(255);
-    }
-    mouse.draw();
-    center.draw();
+    world.update(0.05);
+    world.draw();
 }

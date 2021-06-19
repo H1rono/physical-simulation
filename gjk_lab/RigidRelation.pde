@@ -14,7 +14,7 @@ class RigidRelation {
 RigidRelation make_relation(Rigid rigid1, Rigid rigid2) {
     // http://angra.blog31.fc2.com/blog-entry-115.html
     RigidRelation relation = new RigidRelation(rigid1, rigid2, false, new PVector(0, 0));
-    Rigid minkowski_diff = new MinkowskiDiff(rigid1, rigid2);
+    Convex minkowski_diff = new MinkowskiDiff(rigid1, rigid2);
 
     // GJK法
     Simplex smp = new Simplex();
@@ -36,7 +36,7 @@ RigidRelation make_relation(Rigid rigid1, Rigid rigid2) {
     }
     // 反復部分を回数制限付きで実行
     // 制限を緩めるとより時間がかかるようになるが、精度が上がる
-    for (int i = 0; i < 25; ++i) {
+    for (int i = 0; i < 50; ++i) {
         // vec = PVector.sub(smp.vertex2, smp.vertex1)と同意
         vec.set(smp.vertex2).sub(smp.vertex1);
         // 法線ベクトル
@@ -69,7 +69,7 @@ RigidRelation make_relation(Rigid rigid1, Rigid rigid2) {
     polygon.add_vertex(smp.vertex1);
     polygon.add_vertex(smp.vertex2);
     polygon.add_vertex(smp.vertex3);
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i < 100; ++i) {
         vec.set(polygon.contact_normal(zero)).mult(-1);
         polygon.add_vertex(minkowski_diff.support(relation.contact_normal));
         if (vec.x == relation.contact_normal.x && vec.y == relation.contact_normal.y) { break; }
