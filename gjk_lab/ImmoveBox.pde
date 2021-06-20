@@ -113,12 +113,28 @@ class ImmoveBox extends WorldElement {
         PVector v1 = new PVector(-w * c - h * s, -w * s + h * c).add(center),
                 v2 = new PVector( w * c - h * s,  w * s + h * c).add(center),
                 v3 = new PVector( w * c + h * s,  w * s - h * c).add(center),
-                v4 = new PVector(-w * c + h * s, -w * s - h * c).add(center),
-                res = v1;
-        if (res.dot(point) < v2.dot(point)) { res = v2; }
-        if (res.dot(point) < v3.dot(point)) { res = v3; }
-        if (res.dot(point) < v4.dot(point)) { res = v4; }
-        return res;
+                v4 = new PVector(-w * c + h * s, -w * s - h * c).add(center);
+        float d1 = v1.dot(point), d2 = v2.dot(point), d3 = v3.dot(point), d4 = v4.dot(point);
+        float max_dot = max(max(d1, d2), max(d3, d4));
+        boolean m1 = max_dot == d1, m2 = max_dot == d2, m3 = max_dot == d3, m4 = max_dot == d4;
+        if (m1) {
+            return (
+                m2 ? v1.add(v2).div(2)
+                : m3 ? v1.add(v3).div(2)
+                : m4 ? v1.add(v4).div(2)
+                : v1
+            );
+        } else if (m2) {
+            return (
+                m3 ? v2.add(v3).div(2)
+                : m4 ? v2.add(v4).div(2)
+                : v2
+            );
+        } else if (m3) {
+            return m4 ? v3.add(v4).div(2) : v3;
+        } else {
+            return v4;
+        }
     }
 
     @Override

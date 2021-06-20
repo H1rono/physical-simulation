@@ -120,11 +120,21 @@ class Box extends WorldElement {
                 v2 = new PVector( w * c - h * s,  w * s + h * c).add(center),
                 v3 = new PVector( w * c + h * s,  w * s - h * c).add(center),
                 v4 = new PVector(-w * c + h * s, -w * s - h * c).add(center),
-                res = v1;
-        if (res.dot(point) < v2.dot(point)) { res = v2; }
-        if (res.dot(point) < v3.dot(point)) { res = v3; }
-        if (res.dot(point) < v4.dot(point)) { res = v4; }
-        return res;
+                e12 = PVector.sub(v2, v1), e14 = PVector.sub(v4, v1);
+        float d1 = v1.dot(point), d2 = v2.dot(point), d3 = v3.dot(point), d4 = v4.dot(point);
+        float max_dot = max(max(d1, d2), max(d3, d4));
+        if (e12.dot(point) == 0) {
+            return e12.div(2).add(d1 < d4 ? v4 : v1);
+        }
+        if (e14.dot(point) == 0) {
+            return e14.div(2).add(d1 < d2 ? v2 : v1);
+        }
+        return (
+            max_dot == d1 ? v1
+            : max_dot == d2 ? v2
+            : max_dot == d3 ? v3
+            : v4
+        );
     }
 
     @Override
