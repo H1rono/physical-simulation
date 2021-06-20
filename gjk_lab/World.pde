@@ -24,7 +24,7 @@ class World implements Drawable {
             WorldElement elem_i = elements.get(i), elem_j = elements.get(j);
             if (!elem_i.is_movable() && !elem_j.is_movable()) { continue; }
             if (!elem_i.aabb_collide(elem_j)) { continue; }
-            RigidRelation relation = make_relation(elem_i, elem_j);
+            RigidRelation relation = make_relation_gjk(elem_i, elem_j);
             if (!relation.collision) { continue; }
             relations.add(relation);
         }
@@ -67,6 +67,7 @@ class World implements Drawable {
     public void update(float delta_time) {
         for (WorldElement elem : elements) {
             elem.reset_force(PVector.mult(gravity, elem.get_mass()));
+            elem.reset_impulse(new PVector(0, 0));
         }
         check_collision();
         solve_relations();

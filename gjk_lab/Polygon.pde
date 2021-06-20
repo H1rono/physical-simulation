@@ -1,6 +1,6 @@
 // 多角形
 // 凹みを許し、できるだけ辺同士が交差しないように頂点を管理する
-class Polygon {
+class Polygon implements Drawable {
     private List<PVector> vertices;
 
     public Polygon() {
