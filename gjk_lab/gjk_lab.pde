@@ -1,6 +1,3 @@
-World world;
-Ball ball;
-
 void draw_arrow(PVector begin, PVector end) {
     line(begin.x, begin.y, end.x, end.y);
     PVector axis = PVector.sub(end, begin).normalize();
@@ -12,6 +9,9 @@ void draw_arrow(PVector begin, PVector end) {
     PVector p2 = PVector.sub(axis, normal).add(end);
     triangle(end.x, end.y, p1.x, p1.y, p2.x, p2.y);
 }
+
+World world;
+Ball ball;
 
 void setup() {
     size(720, 720);

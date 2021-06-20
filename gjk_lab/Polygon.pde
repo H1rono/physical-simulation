@@ -44,7 +44,7 @@ class Polygon implements Drawable {
         PVector vert1 = PVector.sub(vertices.get(0), point),
                 vert2 = PVector.sub(vertices.get(num_vert - 1), point);
         PVector v21 = PVector.sub(vert1, vert2); // vert2 -> vert1
-        float ratio = vert1.dot(v21) / v21.magSq();
+        float ratio = (vert1.magSq() - vert1.dot(vert2)) / v21.magSq();
         // result = vert1 + ratio * (vert2 - vert1)    <---- if 0 <= ratio <= 1
         // result = vert1                              <---- if ratio < 0
         // result = vert2                              <---- if 1 < ratio
@@ -52,14 +52,14 @@ class Polygon implements Drawable {
         float dist = result.magSq();
         for (int i = 1; i < num_vert; ++i) {
             vert2 = vert1.copy();
-            vert1 = vertices.get(i).copy().sub(point);
+            vert1 = PVector.sub(vertices.get(i), point);
             v21 = vert1.copy().sub(vert2);
-            ratio = vert1.dot(v21) / v21.magSq();
+            ratio = (vert1.magSq() - vert1.dot(vert2)) / v21.magSq();
             PVector res = PVector.add(vert1, v21.mult(max(min(ratio, 1), 0) - 1));
             float d = res.magSq();
             if (d < dist) {
                 dist = d;
-                result.set(res);
+                result = res;
             }
         }
         return result.mult(-1);

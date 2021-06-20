@@ -67,8 +67,6 @@ class World implements Drawable {
     public void solve_relations() {
         for (RigidRelation rel : relations) {
             solve_relation(rel);
-            PVector center1 = rel.rigid1.get_center();
-            draw_arrow(center1, PVector.sub(center1, rel.contact_normal));
         }
         relations.clear();
     }
