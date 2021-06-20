@@ -47,7 +47,7 @@ class Box implements PhysicalObj {
 
     // pointから四角形に到達するのに最も近いベクトル
     @Override
-    public PVector closest_vector(float x, float y) {
+    public PVector contact_vector(float x, float y) {
         return new PVector(
             x < position.x ? x - position.x
             : x <= position.x + w_len ? 0
@@ -57,15 +57,16 @@ class Box implements PhysicalObj {
             : y - (position.y + h_len)
         );
     }
+
     @Override
-    public PVector closest_vector(PVector point) {
-        return closest_vector(point.x, point.y);
+    public PVector contact_vector(PVector point) {
+        return contact_vector(point.x, point.y);
     }
 
     // 衝突判定の関数
     @Override
     public boolean is_collide(PhysicalObj other) {
-        PVector cv = other.closest_vector(get_center());
+        PVector cv = other.contact_vector(get_center());
         return (
             abs(cv.x) <= w_len / 2
             && abs(cv.y) <= h_len / 2
@@ -75,7 +76,7 @@ class Box implements PhysicalObj {
     // 「影響」の関数
     @Override
     public Effect effect_on(PhysicalObj other) {
-        PVector dir_e = closest_vector(other.get_center()).normalize();
+        PVector dir_e = contact_vector(other.get_center()).normalize();
 
         PVector impulse_ = new PVector(0, 0);
         {
@@ -87,8 +88,7 @@ class Box implements PhysicalObj {
                 float im = (
                     (1 + 1/* 反発係数 */)
                     * (this_v - other_v)
-                    * this_m * other_m
-                    / (this_m + other_m)
+                    * this_m * other_m / (this_m + other_m)
                 );
                 impulse_.add(dir_e).mult(im);
             }
@@ -96,9 +96,8 @@ class Box implements PhysicalObj {
 
         PVector force_ = new PVector(0, 0);
         {
-            float this_f = dir_e.dot(this.get_force());
             float other_f = dir_e.dot(other.get_force());
-            force_.add(dir_e).mult(min(this_f - other_f, 0));
+            force_.add(dir_e).mult(min(-other_f, 0));
             // TODO: 摩擦
         }
 

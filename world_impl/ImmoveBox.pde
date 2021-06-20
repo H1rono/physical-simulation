@@ -31,7 +31,7 @@ public class ImmoveBox implements PhysicalObj {
 
     @Override
     public PVector get_center() {
-        // 他のオブジェクトとの位置関係はclosest_vectorで調べられるからテキトー
+        // 他のオブジェクトとの位置関係はcontact_vectorで調べられるからテキトー
         return position.copy().add(w_len / 2, h_len / 2);
     }
 
@@ -41,7 +41,7 @@ public class ImmoveBox implements PhysicalObj {
     }
 
     @Override
-    public PVector closest_vector(float x, float y) {
+    public PVector contact_vector(float x, float y) {
         return new PVector(
             x < position.x ? x - position.x
             : x <= position.x + w_len ? 0
@@ -52,13 +52,13 @@ public class ImmoveBox implements PhysicalObj {
         );
     }
     @Override
-    public PVector closest_vector(PVector point) {
-        return closest_vector(point.x, point.y);
+    public PVector contact_vector(PVector point) {
+        return contact_vector(point.x, point.y);
     }
 
     @Override
     public boolean is_collide(PhysicalObj other) {
-        PVector cv = other.closest_vector(get_center());
+        PVector cv = other.contact_vector(get_center());
         return (
             abs(cv.x) <= w_len / 2
             && abs(cv.y) <= h_len / 2
@@ -67,7 +67,7 @@ public class ImmoveBox implements PhysicalObj {
 
     @Override
     public Effect effect_on(PhysicalObj other) {
-        PVector dir_e = closest_vector(other.get_center()).normalize();
+        PVector dir_e = contact_vector(other.get_center()).normalize();
 
         PVector impulse_ = new PVector(0, 0);
         {

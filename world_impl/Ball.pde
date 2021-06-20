@@ -44,11 +44,11 @@ class Ball implements PhysicalObj {
     }
 
     @Override
-    public PVector closest_vector(float x, float y) {
-        return closest_vector(new PVector(x, y));
+    public PVector contact_vector(float x, float y) {
+        return contact_vector(new PVector(x, y));
     }
     @Override
-    public PVector closest_vector(PVector point) {
+    public PVector contact_vector(PVector point) {
         PVector sub = PVector.sub(point, position);
         float mag = sub.mag();
         return mag <= radius ? new PVector(0, 0) : sub.mult((mag - radius) / mag);
@@ -56,12 +56,12 @@ class Ball implements PhysicalObj {
 
     @Override
     public boolean is_collide(PhysicalObj other) {
-        return other.closest_vector(position).mag() <= radius;
+        return other.contact_vector(position).mag() <= radius;
     }
 
     @Override
     Effect effect_on(PhysicalObj other) {
-        PVector dir_e = closest_vector(other.get_center()).normalize();
+        PVector dir_e = contact_vector(other.get_center()).normalize();
 
         PVector impulse_ = new PVector(0, 0);
         {

@@ -11,11 +11,12 @@ interface PhysicalObj {
 
     public float get_mass();
 
-    // pointから物体に到達するのに最も近いベクトルを計算する
+    // pointから物体に接触するのに最も近いベクトルを計算する
     // pointが物体に含まれている場合は0ベクトルを返す
-    public PVector closest_vector(float x, float y);
-    public PVector closest_vector(PVector point);
+    public PVector contact_vector(float x, float y);
+    public PVector contact_vector(PVector point);
 
+    // 衝突判定
     public boolean is_collide(PhysicalObj other);
 
     // otherとこの物体が衝突しているものとして、otherに与える影響(力と力積)を返す

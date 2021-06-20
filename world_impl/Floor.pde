@@ -27,7 +27,7 @@ public class Floor implements PhysicalObj {
 
     @Override
     public PVector get_center() {
-        // 他のオブジェクトとの位置関係はclosest_vectorで調べられるからテキトー
+        // 他のオブジェクトとの位置関係はcontact_vectorで調べられるからテキトー
         return new PVector(0, this.height);
     }
 
@@ -37,19 +37,19 @@ public class Floor implements PhysicalObj {
     }
 
     @Override
-    public PVector closest_vector(float x, float y) {
+    public PVector contact_vector(float x, float y) {
         // 下向き正より、point.y - this.height > 0の場合はpointが床より下
         return new PVector(0, min(0, y - this.height));
     }
     @Override
-    public PVector closest_vector(PVector point) {
-        return closest_vector(0, point.y);
+    public PVector contact_vector(PVector point) {
+        return contact_vector(0, point.y);
     }
 
     @Override
     public boolean is_collide(PhysicalObj other) {
         // y = this.heightの直線と交わっているかで判定
-        PVector cv = other.closest_vector(0, this.height);
+        PVector cv = other.contact_vector(0, this.height);
         return cv.y == 0;
     }
 
