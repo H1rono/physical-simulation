@@ -17,13 +17,17 @@ class Polygon implements Drawable {
             vertices.add(vert);
             return;
         }
-        PVector unit1 = PVector.sub(vertices.get(0), vert).normalize(),
+        PVector vert_ = vertices.get(0),
+                unit1 = PVector.sub(vert_, vert).normalize(),
                 unit2 = PVector.sub(vertices.get(num_vert - 1), vert).normalize();
+        if (vert_.x == vert.x && vert_.y == vert.y) { return; }
         float cos_min = unit1.dot(unit2);
         int insert_index = num_vert;
         for (int i = 1; i < num_vert; ++i) {
             unit2 = unit1;
-            unit1 = PVector.sub(vertices.get(i), vert).normalize();
+            vert_ = vertices.get(i);
+            if (vert_.x == vert.x && vert_.y == vert.y) { return; }
+            unit1 = PVector.sub(vert_, vert).normalize();
             float cos_ = unit1.dot(unit2);
             if (cos_ < cos_min) {
                 cos_min = cos_;
@@ -47,9 +51,9 @@ class Polygon implements Drawable {
         PVector result = PVector.add(vert1, v21.mult(max(min(ratio, 1), 0) - 1));
         float dist = result.magSq();
         for (int i = 1; i < num_vert; ++i) {
-            vert2.set(vert1);
-            vert1.set(vertices.get(i)).sub(point);
-            v21.set(vert1).sub(vert2);
+            vert2 = vert1.copy();
+            vert1 = vertices.get(i).copy().sub(point);
+            v21 = vert1.copy().sub(vert2);
             ratio = vert1.dot(v21) / v21.magSq();
             PVector res = PVector.add(vert1, v21.mult(max(min(ratio, 1), 0) - 1));
             float d = res.magSq();
@@ -61,11 +65,24 @@ class Polygon implements Drawable {
         return result.mult(-1);
     }
 
+    public void translate(PVector trans) {
+        for (PVector vert : vertices) {
+            vert.add(trans);
+        }
+    }
+
+    public void scale(float s) {
+        for (PVector vert : vertices) {
+            vert.mult(s);
+        }
+    }
+
     public void draw() {
         push();
         beginShape();
         for (PVector vert : vertices) {
             vertex(vert.x, vert.y);
+            circle(vert.x, vert.y, 30);
         }
         endShape(CLOSE);
         pop();

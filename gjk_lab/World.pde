@@ -41,25 +41,34 @@ class World implements Drawable {
         v1_col = v1.dot(col_n); v1_par = v1.dot(par_n);
         v2_col = v2.dot(col_n); v2_par = v2.dot(par_n);
         float mass1 = relation.rigid1.get_mass(), mass2 = relation.rigid2.get_mass();
-        // 運動量保存の力積
-        float impulse_col = (
+        float impulse_col = ( // 運動量保存の力積
             (movable ? mass1 * mass2 / (mass1 + mass2) : 1)
             * (1 + 1/* 反発係数 */) * (-v1_col + v2_col)
+        );
+        float impulse_par = 0;
+        float force_col = ( // ペナルティ法の力
+            col_n.dot(relation.contact_normal)
         );
         float force_par = (
             (v1_par == v2_par) // true => 静止摩擦力, false => 動摩擦力
             ? 0
             : 0 // (v2_par - v1_par) / abs(v2_par - v1_par)
         );
-        PVector impulse = PVector.mult(col_n, impulse_col);
+        PVector impulse = PVector.mult(col_n, impulse_col).add(PVector.mult(par_n, impulse_par));
         relation.rigid1.add_impulse(impulse);
         impulse.mult(-1);
         relation.rigid2.add_impulse(impulse);
+        PVector force = PVector.mult(col_n, force_col).add(PVector.mult(par_n, force_par));
+        relation.rigid1.add_impulse(force);
+        force.mult(-1);
+        relation.rigid2.add_impulse(force);
     }
 
     public void solve_relations() {
         for (RigidRelation rel : relations) {
             solve_relation(rel);
+            PVector center1 = rel.rigid1.get_center();
+            draw_arrow(center1, PVector.sub(center1, rel.contact_normal));
         }
         relations.clear();
     }

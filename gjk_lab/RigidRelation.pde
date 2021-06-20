@@ -11,7 +11,7 @@ class RigidRelation {
     }
 }
 
-RigidRelation make_relation(Rigid rigid1, Rigid rigid2) {
+RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
     // http://angra.blog31.fc2.com/blog-entry-115.html
     RigidRelation relation = new RigidRelation(rigid1, rigid2, false, new PVector(0, 0));
     Convex minkowski_diff = new MinkowskiDiff(rigid1, rigid2);
@@ -71,9 +71,16 @@ RigidRelation make_relation(Rigid rigid1, Rigid rigid2) {
     polygon.add_vertex(smp.vertex3);
     for (int i = 0; i < 100; ++i) {
         vec.set(polygon.contact_normal(zero)).mult(-1);
-        polygon.add_vertex(minkowski_diff.support(relation.contact_normal));
-        if (vec.x == relation.contact_normal.x && vec.y == relation.contact_normal.y) { break; }
+        polygon.add_vertex(minkowski_diff.support(vec));
+        //if (vec.x == relation.contact_normal.x && vec.y == relation.contact_normal.y) { break; }
         relation.contact_normal.set(vec);
     }
+    PVector center = new PVector(width / 2, height / 2);
+    polygon.translate(center);
+    //polygon.scale(0.5);
+    polygon.draw();
+    draw_arrow(center, PVector.add(relation.contact_normal, center));
     return relation;
 }
+
+//RigidRelation make_relation_sepaxis(Rigid rigid1, Rigid rigid2) {}
