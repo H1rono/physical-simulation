@@ -70,16 +70,15 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
     polygon.add_vertex(smp.vertex2);
     polygon.add_vertex(smp.vertex3);
     for (int i = 0; i < 100; ++i) {
-        vec.set(polygon.contact_normal(zero)).mult(-1);
+        vec.set(polygon.contact_normal(zero));
         polygon.add_vertex(minkowski_diff.support(vec));
-        //if (vec.x == relation.contact_normal.x && vec.y == relation.contact_normal.y) { break; }
+        if (vec.x == relation.contact_normal.x && vec.y == relation.contact_normal.y) { break; }
         relation.contact_normal.set(vec);
     }
-    PVector center = new PVector(width / 2, height / 2);
-    polygon.translate(center);
-    //polygon.scale(0.5);
-    polygon.draw();
-    draw_arrow(center, PVector.add(relation.contact_normal, center));
+    // PVector center = new PVector(width / 2, height / 2);
+    // polygon.translate(center);
+    // polygon.draw();
+    // draw_arrow(center, PVector.add(relation.contact_normal, center));
     return relation;
 }
 
