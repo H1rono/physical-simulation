@@ -42,7 +42,7 @@ class World implements Drawable {
         v2_col = v2.dot(col_n); v2_par = v2.dot(par_n);
         float mass1 = relation.rigid1.get_mass(), mass2 = relation.rigid2.get_mass();
         float impulse_col = ( // 運動量保存の力積
-            (movable ? mass1 * mass2 / (mass1 + mass2) : 1)
+            (movable ? mass1 * mass2 / (mass1 + mass2) : mass1)
             * (1 + 1/* 反発係数 */) * (-v1_col + v2_col)
         );
         float impulse_par = 0;

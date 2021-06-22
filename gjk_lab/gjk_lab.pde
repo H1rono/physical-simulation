@@ -15,7 +15,7 @@ Ball ball;
 
 void setup() {
     size(720, 720);
-    world = new World(new PVector(0, 0));
+    world = new World(new PVector(0, 10));
     ball = new Ball(
         new PVector(100, 100),
         50, 10
@@ -31,9 +31,10 @@ void draw() {
     // デバッグ用
     // if (!keyPressed) { return; }
     background(255);
-    ball.get_center().set(mouseX, mouseY);
-    world.draw();
+    //ball.get_center().set(mouseX, mouseY);
     world.update(0.05);
+    world.draw();
+    println(ball.get_center());
 }
 
 void mousePressed() {
