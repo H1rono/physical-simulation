@@ -8,6 +8,7 @@ abstract class Rigid extends Convex {
 
     abstract public float get_mass();
 
+    abstract public PVector get_force();
     abstract public void reset_force(PVector force);
     abstract public void add_force(PVector force);
 

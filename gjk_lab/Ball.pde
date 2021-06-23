@@ -24,6 +24,7 @@ class Ball extends WorldElement {
 
     public float get_mass() { return mass; }
 
+    public PVector get_force() { return PVector.mult(accelaration, mass); }
     public void reset_force(PVector force) {
         accelaration.set(force).div(mass);
     }
@@ -63,6 +64,7 @@ class Ball extends WorldElement {
         velocity.add(PVector.div(impulse, mass));
         center.add(PVector.mult(velocity, delta_time));
         velocity.add(PVector.mult(accelaration, delta_time));
+        impulse.set(0, 0);
     }
 
     @Override

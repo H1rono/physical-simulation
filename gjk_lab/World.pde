@@ -30,14 +30,13 @@ class World implements Drawable {
         }
     }
 
-    private void solve_relation(RigidRelation relation) {
-        // col: 衝突面と垂直方向
-        // par: 衝突面と平行方向
+    private PVector solve_relation_impulse(RigidRelation relation) {
         boolean movable = relation.rigid1.is_movable() && relation.rigid2.is_movable();
-        float v1_col, v1_par, v2_col, v2_par;
         PVector col_n = relation.contact_normal.copy().normalize();
         PVector par_n = new PVector(col_n.y, -col_n.x);
         PVector v1 = relation.rigid1.get_velocity(), v2 = relation.rigid2.get_velocity();
+        PVector f1 = relation.rigid1.get_force(), f2 = relation.rigid2.get_force();
+        float v1_col, v1_par, v2_col, v2_par;
         v1_col = v1.dot(col_n); v1_par = v1.dot(par_n);
         v2_col = v2.dot(col_n); v2_par = v2.dot(par_n);
         float mass1 = relation.rigid1.get_mass(), mass2 = relation.rigid2.get_mass();
@@ -46,22 +45,55 @@ class World implements Drawable {
             * (1 + 1/* 反発係数 */) * (-v1_col + v2_col)
         );
         float impulse_par = 0;
-        float force_col = ( // ペナルティ法の力
-            col_n.dot(relation.contact_normal)
+        return PVector.mult(col_n, impulse_col).add(PVector.mult(par_n, impulse_par));
+    }
+
+    private PVector solve_relation_force(RigidRelation relation) {
+        PVector col_n = relation.contact_normal.copy().normalize();
+        PVector par_n = new PVector(col_n.y, -col_n.x);
+        PVector v1 = relation.rigid1.get_velocity(), v2 = relation.rigid2.get_velocity();
+        PVector f1 = relation.rigid1.get_force(), f2 = relation.rigid2.get_force();
+        float f1_col, f1_par, f2_col, f2_par;
+        float v1_par = relation.rigid1.get_velocity().dot(par_n);
+        float v2_par = relation.rigid2.get_velocity().dot(par_n);
+        f1_col = f1.dot(col_n); f1_par = f1.dot(par_n);
+        f2_col = f2.dot(col_n); f2_par = f2.dot(par_n);
+        float rel_fcol = f1_col - f2_col, rel_fpar = f1_par - f2_par;
+        float force_col = ( // ペナルティ法の力 + 作用/反作用
+            //- relation.contact_normal.mag()
+            - rel_fcol
         );
-        float force_par = (
-            (v1_par == v2_par) // true => 静止摩擦力, false => 動摩擦力
-            ? 0
-            : 0 // (v2_par - v1_par) / abs(v2_par - v1_par)
-        );
-        PVector impulse = PVector.mult(col_n, impulse_col).add(PVector.mult(par_n, impulse_par));
+        float force_par = 0;
+        if (rel_fcol > 0) {
+            if (v1_par == v2_par) {
+                // 静止摩擦力
+                if (f1_par != f2_par) {
+                    float fpar_mag = min(abs(rel_fpar), rel_fcol * 1/* 静止摩擦係数 */);
+                    float fpar_sign = -rel_fpar / abs(rel_fpar);
+                    force_par = fpar_mag * fpar_sign;
+                }
+            } else {
+                // 動摩擦力
+                float rel_vpar = v1_par - v2_par;
+                float fpar_mag = abs(rel_fcol) * 0.5/* 動摩擦係数 */;
+                float fpar_sign = -rel_vpar / abs(rel_vpar);
+                force_par = fpar_mag * fpar_sign;
+            }
+        }
+        return PVector.mult(col_n, force_col).add(PVector.mult(par_n, force_par));
+    }
+
+    private void solve_relation(RigidRelation relation) {
+        // col: 衝突面と垂直方向, par: 衝突面と平行方向
+        PVector impulse = solve_relation_impulse(relation);
         relation.rigid1.add_impulse(impulse);
         impulse.mult(-1);
         relation.rigid2.add_impulse(impulse);
-        PVector force = PVector.mult(col_n, force_col).add(PVector.mult(par_n, force_par));
-        relation.rigid1.add_impulse(force);
+
+        PVector force = solve_relation_force(relation);
+        relation.rigid1.add_force(force);
         force.mult(-1);
-        relation.rigid2.add_impulse(force);
+        relation.rigid2.add_force(force);
     }
 
     public void solve_relations() {

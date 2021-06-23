@@ -51,6 +51,8 @@ class ImmoveBox extends WorldElement {
     public float get_mass() { return 0; }
 
     @Override
+    public PVector get_force() { return new PVector(0, 0); }
+    @Override
     public void reset_force(PVector force) {
         // do nothing
     }

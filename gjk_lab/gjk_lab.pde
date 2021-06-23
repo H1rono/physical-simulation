@@ -11,18 +11,17 @@ void draw_arrow(PVector begin, PVector end) {
 }
 
 World world;
-Ball ball;
 
 void setup() {
     size(720, 720);
     world = new World(new PVector(0, 10));
-    ball = new Ball(
-        new PVector(100, 100),
-        50, 10
-    );
-    world.add_element(ball);
-    world.add_element(new ImmoveBox(
-        new PVector(width / 2, height - 100),
+    world.add_element(new Box(
+        new PVector(100, height - 150),
+        new PVector(0, 0),
+        100, 100, 100
+    ));
+    world.add_element(new ImmoveBox( // 床
+        new PVector(width / 2, height - 50),
         width, 100
     ));
 }
@@ -31,12 +30,6 @@ void draw() {
     // デバッグ用
     // if (!keyPressed) { return; }
     background(255);
-    //ball.get_center().set(mouseX, mouseY);
     world.update(0.05);
     world.draw();
-    println(ball.get_center());
-}
-
-void mousePressed() {
-    println("(" + mouseX + ", " + mouseY + ")");
 }
