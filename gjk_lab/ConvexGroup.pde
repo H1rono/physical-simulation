@@ -38,7 +38,6 @@ class ConvexGroup extends Convex {
         }
         return x;
     }
-
     @Override
     public float min_y() {
         if (convexes.size() == 0) { return 0; }

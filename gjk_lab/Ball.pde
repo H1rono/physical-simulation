@@ -1,49 +1,63 @@
 class Ball extends WorldElement {
-    private PVector center, velocity, accelaration, impulse;
+    private PVector center, velocity, force, impulse;
     private float radius, mass;
 
-    public Ball(PVector _center, float _radius, float _mass) {
+    public Ball(PVector _center,PVector _velocity, float _radius, float _mass) {
         center = new PVector(0, 0);
         center.set(_center);
         radius = _radius;
         mass = _mass;
-        velocity = new PVector(0, 0);
-        accelaration = new PVector(0, 0);
+        velocity = _velocity;
+        force = new PVector(0, 0);
         impulse = new PVector(0, 0);
     }
 
     public float get_radius() { return radius; }
-    public void set_radius(float r) { radius = r; }
+    public void set_radius(float _radius) { radius = _radius; }
 
+    @Override
     public PVector get_center() { return center; }
-    public void set_center(PVector c) { center.set(c); }
-    public PVector set_center(float x, float y) { return center.set(x, y); }
+    @Override
+    public void set_center(PVector _center) { center.set(_center); }
+    @Override
+    public void add_center(PVector _center) { center.add(_center); }
 
+    @Override
     public PVector get_velocity() { return velocity; }
-    public PVector get_accelaration() { return accelaration; }
+    @Override
+    public void set_velocity(PVector _velocity) { velocity.set(_velocity); }
+    @Override
+    public void add_velocity(PVector _velocity) { velocity.add(_velocity); }
 
+    @Override
     public float get_mass() { return mass; }
+    
+    @Override
+    public void set_force(PVector _force) {
+        force.set(_force);
+    }
+    @Override
+    public void add_force(PVector _force) {
+        force.add(_force);
+    }
 
-    public PVector get_force() { return PVector.mult(accelaration, mass); }
-    public void reset_force(PVector force) {
-        accelaration.set(force).div(mass);
+    @Override
+    public void reset_impulse() {
+        impulse.set(0, 0);
     }
-    public void add_force(PVector force) {
-        accelaration.add(PVector.div(force, mass));
+    @Override
+    public void add_impulse(PVector _impulse) {
+        impulse.add(_impulse);
     }
-
-    public void reset_impulse(PVector impulse) {
-        this.impulse.set(impulse);
-    }
-    public void add_impulse(PVector impulse) {
-        this.impulse.add(impulse);
+    @Override
+    public void apply_impulse() {
+        velocity.add(PVector.div(impulse, mass));
     }
 
     @Override
     public float min_x() { return center.x - radius; }
     @Override
     public float max_x() { return center.x + radius; }
-
     @Override
     public float min_y() { return center.y - radius; }
     @Override
@@ -61,10 +75,9 @@ class Ball extends WorldElement {
 
     @Override
     public void update(float delta_time) {
-        velocity.add(PVector.div(impulse, mass));
-        center.add(PVector.mult(velocity, delta_time));
-        velocity.add(PVector.mult(accelaration, delta_time));
-        impulse.set(0, 0);
+        center.add(PVector.mult(velocity, delta_time))
+        .add(PVector.mult(force, delta_time * delta_time / mass / 2));
+        velocity.add(PVector.mult(force, delta_time / mass));
     }
 
     @Override

@@ -1,3 +1,4 @@
+/*
 class MinkowskiSum extends Convex {
     private Convex cnv1, cnv2;
 
@@ -15,6 +16,7 @@ class MinkowskiSum extends Convex {
     public float min_x() {
         return cnv1.min_x() + cnv2.min_x();
     }
+
     @Override
     public float max_x() {
         return cnv1.max_x() + cnv2.max_x();
@@ -24,8 +26,10 @@ class MinkowskiSum extends Convex {
     public float min_y() {
         return cnv1.min_y() + cnv2.min_y();
     }
+
     @Override
     public float max_y() {
         return cnv1.max_y() + cnv2.max_y();
     }
 }
+*/

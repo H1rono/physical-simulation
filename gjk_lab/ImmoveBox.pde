@@ -1,6 +1,6 @@
 class ImmoveBox extends WorldElement {
     private PVector center;
-    private float w_len, h_len, rotation, mass;
+    private float w_len, h_len, rotation;
 
     /*
     rotation == 0:
@@ -28,14 +28,19 @@ class ImmoveBox extends WorldElement {
         center.set(_center);
         w_len = abs(_w_len);
         h_len = abs(_h_len);
-        rotation = _rotation;
+        rotation = 0;
     }
 
     public ImmoveBox(PVector _center, float _w_len, float _h_len) {
         this(_center, _w_len, _h_len, 0);
     }
 
+    @Override
     public PVector get_center() { return center; }
+    @Override
+    public void set_center(PVector _center) { center.set(_center); }
+    @Override
+    public void add_center(PVector _center) { }
 
     public float get_width() { return w_len; }
     public float get_height() { return h_len; }
@@ -43,32 +48,33 @@ class ImmoveBox extends WorldElement {
 
     @Override
     public PVector get_velocity() { return new PVector(0, 0); }
+    @Override
+    public void set_velocity(PVector _velocity) { }
+    @Override
+    public void add_velocity(PVector _velocity) { }
+    
+    @Override
+    public float get_mass() { return Float.POSITIVE_INFINITY; }
 
     @Override
-    public PVector get_accelaration() { return new PVector(0, 0); }
-
+    public void set_force(PVector _force) {
+        // do nothing
+    }
     @Override
-    public float get_mass() { return 0; }
-
-    @Override
-    public PVector get_force() { return new PVector(0, 0); }
-    @Override
-    public void reset_force(PVector force) {
+    public void add_force(PVector _force) {
         // do nothing
     }
 
     @Override
-    public void add_force(PVector force) {
+    public void reset_impulse() {
         // do nothing
     }
-
     @Override
-    public void reset_impulse(PVector impulse) {
+    public void add_impulse(PVector _impulse) {
         // do nothing
     }
-
     @Override
-    public void add_impulse(PVector impulse) {
+    public void apply_impulse() {
         // do nothing
     }
 
@@ -88,7 +94,6 @@ class ImmoveBox extends WorldElement {
             max( w * c + h * s, -w * c + h * s)  // v3, v4
         );
     }
-
     @Override
     public float min_y() {
         float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
@@ -111,11 +116,11 @@ class ImmoveBox extends WorldElement {
 
     @Override
     public PVector support(PVector point) {
-        float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
-        PVector v1 = new PVector(-w * c - h * s, -w * s + h * c).add(center),
-                v2 = new PVector( w * c - h * s,  w * s + h * c).add(center),
-                v3 = new PVector( w * c + h * s,  w * s - h * c).add(center),
-                v4 = new PVector(-w * c + h * s, -w * s - h * c).add(center);
+        float w = w_len / 2, h = h_len / 2;
+        PVector v1 = new PVector(-w,-h).rotate(rotation).add(center),
+                v2 = new PVector(w,-h).rotate(rotation).add(center),
+                v3 = new PVector(w,h).rotate(rotation).add(center),
+                v4 = new PVector(-w,h).rotate(rotation).add(center);
         float d1 = v1.dot(point), d2 = v2.dot(point), d3 = v3.dot(point), d4 = v4.dot(point);
         float max_dot = max(max(d1, d2), max(d3, d4));
         boolean m1 = max_dot == d1, m2 = max_dot == d2, m3 = max_dot == d3, m4 = max_dot == d4;

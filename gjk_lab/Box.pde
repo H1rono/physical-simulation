@@ -1,5 +1,5 @@
 class Box extends WorldElement {
-    private PVector center, velocity, accelaration, impulse;
+    private PVector center, velocity, force, impulse;
     private float w_len, h_len, rotation, mass;
 
     /*
@@ -23,66 +23,65 @@ class Box extends WorldElement {
     v4 - center = d4 * R = (-w * c - h * (-s), -w * s - h * c)
     */
 
-    public Box(PVector center, PVector velocity, PVector accelaration, float w_len, float h_len, float mass) {
-        this.center = center;
-        this.velocity = velocity;
-        this.accelaration = accelaration;
-        this.impulse = new PVector(0, 0);
-        this.w_len = w_len;
-        this.h_len = h_len;
-        this.mass = mass;
+    public Box(PVector _center, PVector _velocity, float _w_len, float _h_len, float _rotation ,float _mass) {
+        center = new PVector(0, 0);
+        velocity = _velocity;
+        force = new PVector(0, 0);
+        impulse = new PVector(0, 0);
+        center.set(_center);
+        w_len = abs(_w_len);
+        h_len = abs(_h_len);
+        rotation = 0;
+        mass = _mass;
     }
-
-    public Box(PVector center, PVector velocity, float w_len, float h_len, float mass) {
-        this(center, velocity, new PVector(0, 0), w_len, h_len, mass);
-    }
-
-    public Box(PVector center, float w_len, float h_len, float mass) {
-        this(center, new PVector(0, 0), new PVector(0, 0), w_len, h_len, mass);
-    }
-
+    @Override
     public PVector get_center() { return center; }
-    public void set_center(PVector cen) { center.set(cen); }
+    @Override
+    public void set_center(PVector _center) { center.set(_center); }
+    @Override
+    public void add_center(PVector _center) { center.add(_center); }
 
     public float get_width() { return w_len; }
-    public void set_width(float w) { w_len = abs(w); }
+    public void set_width(float _w_len) { w_len = abs(_w_len); }
 
     public float get_height() { return h_len; }
-    public void set_height(float h) { h_len = abs(h); }
+    public void set_height(float _h_len) { h_len = abs(_h_len); }
 
     public float get_rotation() { return rotation; }
-    public void set_rotation(float r) { rotation = r; }
-    public void rotate_by(float r) { rotation += r; }
+    public void set_rotation(float _rotation) { rotation = _rotation; }
+    public void rotate_by(float _rotation) { rotation += _rotation; }
 
     @Override
     public PVector get_velocity() { return velocity; }
-
     @Override
-    public PVector get_accelaration() { return accelaration; }
-
+    public void set_velocity(PVector _velocity) { velocity.set(_velocity); }
+    @Override
+    public void add_velocity(PVector _velocity) { velocity.add(_velocity); }
+    
     @Override
     public float get_mass() { return mass; }
 
     @Override
-    public PVector get_force() { return PVector.mult(accelaration, mass); }
-    @Override
-    public void reset_force(PVector force) {
-        accelaration.set(force).div(mass);
+    public void set_force(PVector _force) {
+        force.set(_force);
     }
 
     @Override
-    public void add_force(PVector force) {
-        accelaration.add(PVector.div(force, mass));
+    public void add_force(PVector _force) {
+        force.add(_force);
     }
 
     @Override
-    public void reset_impulse(PVector impulse) {
-        this.impulse.set(impulse);
+    public void reset_impulse() {
+        impulse.set(0, 0);
     }
-
     @Override
-    public void add_impulse(PVector impulse) {
-        this.impulse.add(impulse);
+    public void add_impulse(PVector _impulse) {
+        impulse.add(_impulse);
+    }
+    @Override
+    public void apply_impulse() {
+        velocity.add(PVector.div(impulse, mass));
     }
 
     @Override
@@ -101,7 +100,6 @@ class Box extends WorldElement {
             max( w * c + h * s, -w * c + h * s)  // v3, v4
         );
     }
-
     @Override
     public float min_y() {
         float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
@@ -125,10 +123,10 @@ class Box extends WorldElement {
     @Override
     public PVector support(PVector point) {
         float w = w_len / 2, h = h_len / 2, c = cos(rotation), s = sin(rotation);
-        PVector v1 = new PVector(-w * c - h * s, -w * s + h * c).add(center),
-                v2 = new PVector( w * c - h * s,  w * s + h * c).add(center),
-                v3 = new PVector( w * c + h * s,  w * s - h * c).add(center),
-                v4 = new PVector(-w * c + h * s, -w * s - h * c).add(center),
+        PVector v1 = new PVector(-w,-h).rotate(rotation).add(center),
+                v2 = new PVector(w,-h).rotate(rotation).add(center),
+                v3 = new PVector(w,h).rotate(rotation).add(center),
+                v4 = new PVector(-w,h).rotate(rotation).add(center),
                 e12 = PVector.sub(v2, v1), e14 = PVector.sub(v4, v1);
         float d1 = v1.dot(point), d2 = v2.dot(point), d3 = v3.dot(point), d4 = v4.dot(point);
         float max_dot = max(max(d1, d2), max(d3, d4));
@@ -148,9 +146,9 @@ class Box extends WorldElement {
 
     @Override
     public void update(float delta_time) {
-        center.add(PVector.mult(velocity, delta_time));
-        velocity.add(PVector.mult(accelaration, delta_time)).add(PVector.div(impulse, mass));
-        impulse.set(0, 0);
+        center.add(PVector.mult(velocity, delta_time))
+        .add(PVector.mult(force, delta_time * delta_time / mass / 2));
+        velocity.add(PVector.mult(force, delta_time / mass));
     }
 
     @Override

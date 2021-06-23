@@ -28,7 +28,7 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
     }
     // 逆ベクトルに同様の操作をする
     // vecは一時的な変数
-    PVector vec = PVector.mult(smp.vertex1, -1);
+    PVector vec = new PVector(-1, 0);
     smp.vertex2.set(minkowski_diff.support(vec));
     if (smp.vertex2.x == 0 && smp.vertex2.y == 0) {
         relation.collision = true;
@@ -36,7 +36,7 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
     }
     // 反復部分を回数制限付きで実行
     // 制限を緩めるとより時間がかかるようになるが、精度が上がる
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i < 10; ++i) {
         // vec = PVector.sub(smp.vertex2, smp.vertex1)と同意
         vec.set(smp.vertex2).sub(smp.vertex1);
         // 法線ベクトル
@@ -60,7 +60,7 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
             smp.vertex1.set(smp.vertex3);
         } else if (max_mag == mp2) {
             smp.vertex2.set(smp.vertex3);
-        } /* max_mag == mp3 : do nothing */
+        } 
     }
     if (!relation.collision) { return relation; }
 
@@ -81,5 +81,3 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
     // draw_arrow(center, PVector.add(relation.contact_normal, center));
     return relation;
 }
-
-//RigidRelation make_relation_sepaxis(Rigid rigid1, Rigid rigid2) {}
