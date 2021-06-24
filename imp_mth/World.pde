@@ -1,122 +1,127 @@
 import java.util.List;
 import java.util.ArrayList;
+import java.util.ListIterator;
 
-class World implements Drawable {
+class World {
     private List<WorldElement> elements;
-    private List<RigidRelation> relations;
-    private PVector gravity;
+    private List<Pair> pairs;
+    public PVector gravity;
 
     public World(PVector gravity) {
         elements = new ArrayList<WorldElement>();
-        relations = new ArrayList<RigidRelation>();
-        this.gravity = new PVector();
-        this.gravity.set(gravity);
+        pairs = new ArrayList<Pair>();
+        this.gravity = gravity;
     }
 
-    public void add_element(WorldElement element) {
-        elements.add(element);
+    public void add_element(WorldElement elem) {
+        elements.add(elem);
     }
 
-    public void check_collision() {
-        int length = elements.size();
-        for (int i = 0; i < length - 1; ++i)
-        for (int j = i + 1; j < length; ++j) {
-            WorldElement elem_i = elements.get(i), elem_j = elements.get(j);
-            if (!elem_i.is_movable() && !elem_j.is_movable()) { continue; }
-            if (!elem_i.aabb_collide(elem_j)) { continue; }
-            RigidRelation relation = make_relation_gjk(elem_i, elem_j);
-            if (!relation.collision) { continue; }
-            relations.add(relation);
+    private void update_velocity(float delta_time) {
+        PVector delta_vel = PVector.mult(gravity, delta_time);
+        for (WorldElement elem : elements) {
+            elem.add_velocity(delta_vel);
         }
     }
 
-    private PVector solve_relation_impulse(RigidRelation relation) {
-        boolean movable1 = relation.rigid1.is_movable(), movable2 = relation.rigid2.is_movable();
-        PVector col_n = relation.contact_normal.copy().normalize();
-        PVector par_n = new PVector(col_n.y, -col_n.x);
-        PVector v1 = relation.rigid1.get_velocity(), v2 = relation.rigid2.get_velocity();
-        float v1_col, v2_col;
-        v1_col = v1.dot(col_n);
-        v2_col = v2.dot(col_n);
-        float mass1 = relation.rigid1.get_mass(), mass2 = relation.rigid2.get_mass();
-        float impulse_col = ( // 運動量保存の力積
-            (movable1 && movable2 ? mass1 * mass2 / (mass1 + mass2)
-                : movable1 ? mass1
-                :/*movable2*/mass2)
-            * (1 + 1/* 反発係数 */) * (-v1_col + v2_col)
-        );
-        float impulse_par = 0;
-        return PVector.mult(col_n, impulse_col).add(PVector.mult(par_n, impulse_par));
+    private List<Pair> find_pairs() {
+        List<Pair> result = new ArrayList<Pair>();
+        int elem_num = elements.size();
+        for (int i = 0; i < elem_num - 1; ++i)
+        for (int j = i + 1; j < elem_num; ++j) {
+            WorldElement elem_i = elements.get(i), elem_j = elements.get(j);
+            if (!elem_i.aabb_collide(elem_j)) { continue; }
+            result.add(make_pair(elem_i, elem_j, i, j));
+        }
+        return result;
     }
 
-    private PVector solve_relation_force(RigidRelation relation) {
-        PVector col_n = relation.contact_normal.copy().normalize();
-        PVector par_n = new PVector(col_n.y, -col_n.x);
-        PVector f1 = relation.rigid1.get_force(), f2 = relation.rigid2.get_force();
-        float f1_col, f1_par, f2_col, f2_par;
-        float v1_par = relation.rigid1.get_velocity().dot(par_n);
-        float v2_par = relation.rigid2.get_velocity().dot(par_n);
-        f1_col = f1.dot(col_n); f1_par = f1.dot(par_n);
-        f2_col = f2.dot(col_n); f2_par = f2.dot(par_n);
-        float rel_fcol = f1_col - f2_col, rel_fpar = f1_par - f2_par;
-        float force_col = ( // ペナルティ法の力 + 作用/反作用
-            //- relation.contact_normal.mag()
-            - rel_fcol
-        );
-        float force_par = 0;
-        if (rel_fcol > 0) {
-            if (v1_par == v2_par) {
-                // 静止摩擦力
-                if (f1_par != f2_par) {
-                    float fpar_mag = Math.min(Math.abs(rel_fpar), rel_fcol * 1/* 静止摩擦係数 */);
-                    float fpar_sign = -rel_fpar / Math.abs(rel_fpar);
-                    force_par = fpar_mag * fpar_sign;
-                }
+    private boolean contain_pair(Pair pair) {
+        // めぐる式二分探索
+        // https://qiita.com/drken/items/97e37dd6143e33a64c8c
+        int left = -1, right = pairs.size();
+        if (right == 0) { return false; }
+        while (right - left > 1) {
+            int mid = (right + left) >> 1;
+            Pair mpair = pairs.get(mid);
+            if (pair.idA < mpair.idA || (pair.idA == mpair.idA && pair.idB <= mpair.idB)) {
+                right = mid;
             } else {
-                // 動摩擦力
-                float rel_vpar = v1_par - v2_par;
-                float fpar_mag = Math.abs(rel_fcol) * 0.5f/* 動摩擦係数 */;
-                float fpar_sign = -rel_vpar / Math.abs(rel_vpar);
-                force_par = fpar_mag * fpar_sign;
+                left = mid;
             }
         }
-        return PVector.mult(col_n, force_col).add(PVector.mult(par_n, force_par));
+        if (right == pairs.size()) { return false; }
+        Pair p = pairs.get(right);
+        return pair.idA == p.idA && pair.idB == p.idB;
     }
 
-    private void solve_relation(RigidRelation relation) {
-        // col: 衝突面と垂直方向, par: 衝突面と平行方向
-        PVector impulse = solve_relation_impulse(relation);
-        relation.rigid1.add_impulse(impulse);
-        impulse.mult(-1);
-        relation.rigid2.add_impulse(impulse);
-
-        PVector force = solve_relation_force(relation);
-        relation.rigid1.add_force(force);
-        force.mult(-1);
-        relation.rigid2.add_force(force);
-    }
-
-    public void solve_relations() {
-        for (RigidRelation rel : relations) {
-            solve_relation(rel);
+    public void merge_pairs(List<Pair> new_pairs) {
+        // https://qiita.com/yoshi389111/items/c24f8beefb7b96cad921
+        ListIterator<Pair> pair_it = new_pairs.listIterator();
+        while (pair_it.hasNext()) {
+            Pair npair = pair_it.next();
+            if (npair.type == PairType.not_collide) {
+                pair_it.remove();
+                continue;
+            }
+            if (contain_pair(npair)) {
+                npair.type = PairType.pair_keep;
+            }
         }
-        relations.clear();
+        pairs.clear();
+        pairs = new_pairs;
+    }
+
+    private List<SolverBody> make_solver_bodies() {
+        List<SolverBody> result = new ArrayList<SolverBody>();
+        for (WorldElement elem : elements) {
+            result.add(make_solver_body(elem));
+        }
+        return result;
+    }
+
+    private List<Constraint> make_constraints(float delta_time) {
+        List<Constraint> result = new ArrayList<Constraint>();
+        for (Pair pair : pairs) {
+            result.add(pair2constraint(pair, delta_time));
+        }
+        return result;
+    }
+
+    public void process_constraints(List<Constraint> constraints) {
+        List<SolverBody> solver_bodies = make_solver_bodies();
+        // インパルス法を反復
+        for (int it_num = 0; it_num < 10; it_num++) {
+            int pair_num = pairs.size();
+            for (int pair_i = 0; pair_i < pair_num; pair_i++) {
+                Pair pair = pairs.get(pair_i);
+                Constraint constraint = constraints.get(pair_i);
+                SolverBody sbA = solver_bodies.get(pair.idA), sbB = solver_bodies.get(pair.idB);
+                constraint.eval(sbA, sbB);
+            }
+        }
+        int body_num = elements.size();
+        for (int i = 0; i < body_num; i++) {
+            WorldElement elem = elements.get(i);
+            SolverBody solver_body = solver_bodies.get(i);
+            println(solver_body.delta_velocity);
+            elem.add_velocity(solver_body.delta_velocity);
+        }
     }
 
     public void update(float delta_time) {
+        update_velocity(delta_time);
+        List<Pair> new_pairs = find_pairs();
+        merge_pairs(new_pairs);
+        List<Constraint> constraints = make_constraints(delta_time);
+        process_constraints(constraints);
         for (WorldElement elem : elements) {
-            elem.reset_force(PVector.mult(gravity, elem.get_mass()));
-            elem.reset_impulse(new PVector(0, 0));
-        }
-        check_collision();
-        solve_relations();
-        for (WorldElement elem : elements) {
-            elem.update(delta_time);
+            elem.update_center(delta_time);
         }
     }
 
     public void draw() {
-        for (Drawable elem : elements) {
+        for (WorldElement elem : elements) {
             elem.draw();
         }
     }

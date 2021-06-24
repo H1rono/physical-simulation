@@ -41,6 +41,11 @@ class Box extends WorldElement {
         this(center, new PVector(0, 0), new PVector(0, 0), w_len, h_len, mass);
     }
 
+    @Override
+    public float friction_rate() { return 0.7; }
+    @Override
+    public float restitution_rate() { return 0.7; }
+
     public PVector get_center() { return center; }
     public void set_center(PVector cen) { center.set(cen); }
 
@@ -59,6 +64,14 @@ class Box extends WorldElement {
 
     @Override
     public PVector get_accelaration() { return accelaration; }
+
+    @Override
+    public void add_velocity(PVector velocity) { this.velocity.add(velocity); }
+
+    @Override
+    public void update_center(float delta_time) {
+        center.add(PVector.mult(velocity, delta_time));
+    }
 
     @Override
     public float get_mass() { return mass; }

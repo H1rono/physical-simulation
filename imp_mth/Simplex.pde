@@ -51,28 +51,26 @@ class Simplex {
     // pointから単体の辺上まで最短のベクトル
     public PVector contact_normal(PVector point) {
         PVector vertices[] = new PVector[] {vertex1, vertex2, vertex3};
-        int num_vert = 3;
         PVector vert1 = PVector.sub(vertices[0], point),
-                vert2 = PVector.sub(vertices[num_vert - 1], point);
+                vert2 = PVector.sub(vertices[2], point);
         PVector v21 = PVector.sub(vert1, vert2); // vert2 -> vert1
-        float ratio = vert1.dot(v21) / v21.magSq();
+        float ratio = Math.max(0, Math.min(1,
+            vert1.dot(v21) / v21.magSq()
+        ));
         // result = vert1 + ratio * (vert2 - vert1)    <---- if 0 <= ratio <= 1
         // result = vert1                              <---- if ratio < 0
         // result = vert2                              <---- if 1 < ratio
-        PVector result = PVector.add(vert1, v21.mult(max(min(ratio, 1), 0) - 1));
-        float dist = result.magSq();
-        for (int i = 1; i < num_vert; ++i) {
+        PVector result = PVector.mult(vert1, 1 - ratio).add(PVector.mult(vert2, ratio));
+        for (int i = 1; i < 3; ++i) {
             vert2.set(vert1);
-            vert1.set(vertices[i]).sub(point);
+            vert1.set(PVector.sub(vertices[i], point));
             v21.set(vert1).sub(vert2);
-            ratio = vert1.dot(v21) / v21.magSq();
-            PVector res = PVector.add(vert1, v21.mult(max(min(ratio, 1), 0) - 1));
-            float d = res.magSq();
-            if (d < dist) {
-                dist = d;
+            ratio = Math.max(0, Math.min(1, vert1.dot(v21) / v21.magSq()));
+            PVector res = PVector.mult(vert1, 1 - ratio).add(PVector.mult(vert2, ratio));
+            if (res.magSq() < result.magSq()) {
                 result.set(res);
             }
         }
-        return result.mult(-1);
+        return result;
     }
 }

@@ -15,15 +15,32 @@ class Ball extends WorldElement {
         this(center, new PVector(0, 0), radius, mass);
     }
 
+    @Override
+    public float friction_rate() { return 0; }
+    @Override
+    public float restitution_rate() { return 1; }
+
     public float get_radius() { return radius; }
     public void set_radius(float r) { radius = r; }
 
+    @Override
     public PVector get_center() { return center; }
+
     public void set_center(PVector c) { center.set(c); }
     public PVector set_center(float x, float y) { return center.set(x, y); }
 
+    @Override
     public PVector get_velocity() { return velocity; }
+    @Override
     public PVector get_accelaration() { return accelaration; }
+
+    @Override
+    public void add_velocity(PVector velocity) { this.velocity.add(velocity); }
+
+    @Override
+    public void update_center(float delta_time) {
+        center.add(PVector.mult(velocity, delta_time));
+    }
 
     public float get_mass() { return mass; }
 

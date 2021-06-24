@@ -35,6 +35,9 @@ class ImmoveBox extends WorldElement {
         this(_center, _w_len, _h_len, 0);
     }
 
+    public float friction_rate() { return 0.7; }
+    public float restitution_rate() { return 0.7; }
+
     public PVector get_center() { return center; }
 
     public float get_width() { return w_len; }
@@ -46,6 +49,16 @@ class ImmoveBox extends WorldElement {
 
     @Override
     public PVector get_accelaration() { return new PVector(0, 0); }
+
+    @Override
+    public void add_velocity(PVector velocity) {
+        // do nothing
+    }
+
+    @Override
+    public void update_center(float delta_time) {
+        // do nothing
+    }
 
     @Override
     public float get_mass() { return 0; }

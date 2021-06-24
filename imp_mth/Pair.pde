@@ -1,20 +1,26 @@
-class RigidRelation {
-    public Rigid rigid1, rigid2;
-    public boolean collision;
+class Pair {
+    public PairType type;
+    public Rigid rigidA, rigidB;
+    // 貫通深度
     public PVector contact_normal;
+    // merge_pairsで使う
+    public int idA, idB;
 
-    public RigidRelation(Rigid cnv1, Rigid cnv2, boolean col, PVector normal) {
-        rigid1 = cnv1;
-        rigid2 = cnv2;
-        collision = col;
-        contact_normal = normal;
+    public Pair(PairType type, Rigid rigidA, Rigid rigidB, PVector contact_normal, int idA, int idB) {
+        this.type = type;
+        this.rigidA = rigidA;
+        this.rigidB = rigidB;
+        this.contact_normal = contact_normal;
+        this.idA = idA;
+        this.idB = idB;
     }
 }
 
-RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
+public Pair make_pair(Rigid rigidA, Rigid rigidB, int idA, int idB) {
     // http://angra.blog31.fc2.com/blog-entry-115.html
-    RigidRelation relation = new RigidRelation(rigid1, rigid2, false, new PVector(0, 0));
-    Convex minkowski_diff = new MinkowskiDiff(rigid1, rigid2);
+    // https://trap.jp/post/198/
+    Pair pair = new Pair(PairType.not_collide, rigidA, rigidB, new PVector(0, 0), idA, idB);
+    Convex minkowski_diff = new MinkowskiDiff(rigidA, rigidB);
 
     // GJK法
     Simplex smp = new Simplex();
@@ -23,16 +29,16 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
     smp.vertex1.set(minkowski_diff.support(1, 0));
     // サポート写像が0ベクトル => ミンコフスキー差が原点を含む => 衝突している
     if (smp.vertex1.x == 0 && smp.vertex1.y == 0) {
-        relation.collision = true;
-        return relation;
+        pair.type = PairType.pair_new;
+        return pair;
     }
     // 逆ベクトルに同様の操作をする
     // vecは一時的な変数
     PVector vec = PVector.mult(smp.vertex1, -1);
     smp.vertex2.set(minkowski_diff.support(vec));
     if (smp.vertex2.x == 0 && smp.vertex2.y == 0) {
-        relation.collision = true;
-        return relation;
+        pair.type = PairType.pair_new;
+        return pair;
     }
     // 反復部分を回数制限付きで実行
     // 制限を緩めるとより時間がかかるようになるが、精度が上がる
@@ -45,12 +51,12 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
         if (vec.dot(smp.vertex1) > 0) { vec.mult(-1); }
         smp.vertex3.set(minkowski_diff.support(vec));
         if (smp.vertex3.x == 0 && smp.vertex3.y == 0) {
-            relation.collision = true;
-            return relation;
+            pair.type = PairType.pair_new;
+            return pair;
         }
-        relation.contact_normal.set(smp.contact_normal(zero));
+        pair.contact_normal.set(smp.contact_normal(zero));
         if (smp.contains(zero)) {
-            relation.collision = true;
+            pair.type = PairType.pair_new;
             break;
         }
         // 原点から最も遠い点を削除
@@ -62,7 +68,7 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
             smp.vertex2.set(smp.vertex3);
         } /* max_mag == mp3 : do nothing */
     }
-    if (!relation.collision) { return relation; }
+    if (pair.type == PairType.not_collide) { return pair; }
 
     // EPA法
     Polygon polygon = new Polygon();
@@ -72,14 +78,8 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
     for (int i = 0; i < 100; ++i) {
         vec.set(polygon.contact_normal(zero));
         polygon.add_vertex(minkowski_diff.support(vec));
-        if (vec.x == relation.contact_normal.x && vec.y == relation.contact_normal.y) { break; }
-        relation.contact_normal.set(vec);
+        if (vec.x == pair.contact_normal.x && vec.y == pair.contact_normal.y) { break; }
+        pair.contact_normal.set(vec);
     }
-    // PVector center = new PVector(width / 2, height / 2);
-    // polygon.translate(center);
-    // polygon.draw();
-    // draw_arrow(center, PVector.add(relation.contact_normal, center));
-    return relation;
+    return pair;
 }
-
-//RigidRelation make_relation_sepaxis(Rigid rigid1, Rigid rigid2) {}
