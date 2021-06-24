@@ -15,10 +15,15 @@ World world;
 void setup() {
     size(720, 720);
     world = new World(new PVector(0, 10));
-    world.add_element(new Box(
+    /* world.add_element(new Box(
         new PVector(100, height - 150),
         new PVector(0, 0),
         100, 100, 100
+    )); */
+    world.add_element(new Ball(
+        new PVector(100, height - 150),
+        new PVector(10, 0),
+        50, 50
     ));
     world.add_element(new ImmoveBox( // 床
         new PVector(width / 2, height - 50),
@@ -28,7 +33,7 @@ void setup() {
 
 void draw() {
     // デバッグ用
-    // if (!keyPressed) { return; }
+    if (!keyPressed) { return; }
     background(255);
     world.update(0.05);
     world.draw();

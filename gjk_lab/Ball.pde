@@ -2,14 +2,17 @@ class Ball extends WorldElement {
     private PVector center, velocity, accelaration, impulse;
     private float radius, mass;
 
-    public Ball(PVector _center, float _radius, float _mass) {
-        center = new PVector(0, 0);
-        center.set(_center);
-        radius = _radius;
-        mass = _mass;
-        velocity = new PVector(0, 0);
-        accelaration = new PVector(0, 0);
-        impulse = new PVector(0, 0);
+    public Ball(PVector center, PVector velocity, float radius, float mass) {
+        this.center = center;
+        this.velocity = velocity;
+        this.radius = radius;
+        this.mass = mass;
+        this.accelaration = new PVector(0, 0);
+        this.impulse = new PVector(0, 0);
+    }
+
+    public Ball(PVector center, float radius, float mass) {
+        this(center, new PVector(0, 0), radius, mass);
     }
 
     public float get_radius() { return radius; }

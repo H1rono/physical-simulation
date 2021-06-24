@@ -36,7 +36,7 @@ RigidRelation make_relation_gjk(Rigid rigid1, Rigid rigid2) {
     }
     // 反復部分を回数制限付きで実行
     // 制限を緩めるとより時間がかかるようになるが、精度が上がる
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i < 100; ++i) {
         // vec = PVector.sub(smp.vertex2, smp.vertex1)と同意
         vec.set(smp.vertex2).sub(smp.vertex1);
         // 法線ベクトル

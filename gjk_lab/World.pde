@@ -31,17 +31,18 @@ class World implements Drawable {
     }
 
     private PVector solve_relation_impulse(RigidRelation relation) {
-        boolean movable = relation.rigid1.is_movable() && relation.rigid2.is_movable();
+        boolean movable1 = relation.rigid1.is_movable(), movable2 = relation.rigid2.is_movable();
         PVector col_n = relation.contact_normal.copy().normalize();
         PVector par_n = new PVector(col_n.y, -col_n.x);
         PVector v1 = relation.rigid1.get_velocity(), v2 = relation.rigid2.get_velocity();
-        PVector f1 = relation.rigid1.get_force(), f2 = relation.rigid2.get_force();
-        float v1_col, v1_par, v2_col, v2_par;
-        v1_col = v1.dot(col_n); v1_par = v1.dot(par_n);
-        v2_col = v2.dot(col_n); v2_par = v2.dot(par_n);
+        float v1_col, v2_col;
+        v1_col = v1.dot(col_n);
+        v2_col = v2.dot(col_n);
         float mass1 = relation.rigid1.get_mass(), mass2 = relation.rigid2.get_mass();
         float impulse_col = ( // 運動量保存の力積
-            (movable ? mass1 * mass2 / (mass1 + mass2) : mass1)
+            (movable1 && movable2 ? mass1 * mass2 / (mass1 + mass2)
+                : movable1 ? mass1
+                :/*movable2*/mass2)
             * (1 + 1/* 反発係数 */) * (-v1_col + v2_col)
         );
         float impulse_par = 0;
@@ -51,7 +52,6 @@ class World implements Drawable {
     private PVector solve_relation_force(RigidRelation relation) {
         PVector col_n = relation.contact_normal.copy().normalize();
         PVector par_n = new PVector(col_n.y, -col_n.x);
-        PVector v1 = relation.rigid1.get_velocity(), v2 = relation.rigid2.get_velocity();
         PVector f1 = relation.rigid1.get_force(), f2 = relation.rigid2.get_force();
         float f1_col, f1_par, f2_col, f2_par;
         float v1_par = relation.rigid1.get_velocity().dot(par_n);
@@ -68,15 +68,15 @@ class World implements Drawable {
             if (v1_par == v2_par) {
                 // 静止摩擦力
                 if (f1_par != f2_par) {
-                    float fpar_mag = min(abs(rel_fpar), rel_fcol * 1/* 静止摩擦係数 */);
-                    float fpar_sign = -rel_fpar / abs(rel_fpar);
+                    float fpar_mag = Math.min(Math.abs(rel_fpar), rel_fcol * 1/* 静止摩擦係数 */);
+                    float fpar_sign = -rel_fpar / Math.abs(rel_fpar);
                     force_par = fpar_mag * fpar_sign;
                 }
             } else {
                 // 動摩擦力
                 float rel_vpar = v1_par - v2_par;
-                float fpar_mag = abs(rel_fcol) * 0.5/* 動摩擦係数 */;
-                float fpar_sign = -rel_vpar / abs(rel_vpar);
+                float fpar_mag = Math.abs(rel_fcol) * 0.5f/* 動摩擦係数 */;
+                float fpar_sign = -rel_vpar / Math.abs(rel_vpar);
                 force_par = fpar_mag * fpar_sign;
             }
         }
