@@ -1,25 +1,31 @@
+import java.util.Optional;
+
 class Pair {
     public PairType type;
-    public Rigid rigidA, rigidB;
     // 貫通深度
     public PVector contact_normal;
     // merge_pairsで使う
     public int idA, idB;
+    public Optional<Constraint> constraint_contact, constraint_friction;
 
-    public Pair(PairType type, Rigid rigidA, Rigid rigidB, PVector contact_normal, int idA, int idB) {
+    public Pair(PairType type, PVector contact_normal, int idA, int idB, Constraint cons_cont, Constraint cons_fric) {
         this.type = type;
-        this.rigidA = rigidA;
-        this.rigidB = rigidB;
         this.contact_normal = contact_normal;
         this.idA = idA;
         this.idB = idB;
+        constraint_contact = Optional.ofNullable(cons_cont);
+        constraint_friction = Optional.ofNullable(cons_fric);
+    }
+
+    public Pair(PairType type, PVector contact_normal, int idA, int idB) {
+        this(type, contact_normal, idA, idB, null, null);
     }
 }
 
 public Pair make_pair(Rigid rigidA, Rigid rigidB, int idA, int idB) {
     // http://angra.blog31.fc2.com/blog-entry-115.html
     // https://trap.jp/post/198/
-    Pair pair = new Pair(PairType.not_collide, rigidA, rigidB, new PVector(0, 0), idA, idB);
+    Pair pair = new Pair(PairType.not_collide, new PVector(0, 0), idA, idB);
     Convex minkowski_diff = new MinkowskiDiff(rigidA, rigidB);
 
     // GJK法

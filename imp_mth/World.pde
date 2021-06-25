@@ -4,12 +4,14 @@ import java.util.ListIterator;
 
 class World {
     private List<WorldElement> elements;
+    private List<SolverBody> solver_bodies;
     private List<Pair> pairs;
     public PVector gravity;
 
     public World(PVector gravity) {
         elements = new ArrayList<WorldElement>();
         pairs = new ArrayList<Pair>();
+        solver_bodies = new ArrayList<SolverBody>();
         this.gravity = gravity;
     }
 
@@ -72,12 +74,57 @@ class World {
         pairs = new_pairs;
     }
 
-    private List<SolverBody> make_solver_bodies() {
-        List<SolverBody> result = new ArrayList<SolverBody>();
+    private void update_solver_bodies() {
+        solver_bodies.clear();
         for (WorldElement elem : elements) {
-            result.add(make_solver_body(elem));
+            solver_bodies.add(make_solver_body(elem));
         }
-        return result;
+    }
+
+    public Constraint pair2constraint(Pair pair, float delta_time) {
+        Rigid rigidA = elements.get(pair.idA), rigidB = elements.get(pair.idB);
+        SolverBody solver_bodyA = solver_bodies.get(pair.idA), solver_bodyB = solver_bodies.get(pair.idB);
+        PVector velocityA = rigidA.get_velocity();
+        PVector velocityB = rigidB.get_velocity();
+        PVector relative_vel = PVector.sub(velocityA, velocityB);
+
+        float friction = sqrt(rigidA.friction_rate() * rigidB.friction_rate());
+        // 反発は新しいペアだけで起こる
+        float restitution = pair.type == PairType.pair_new ? (rigidA.restitution_rate() + rigidB.restitution_rate()) * 0.5 : 0;
+
+        PVector axis = new PVector(pair.contact_normal.x, pair.contact_normal.y).normalize();
+        // 速度補正
+        float rhs = -(1 + restitution) * axis.dot(relative_vel);
+        // 位置補正
+        rhs -= pair.contact_normal.mag() / delta_time;
+        // TODO: 質量を反映
+
+        return new Constraint(axis, rhs);
+    }
+
+    private void set_constraint(Pair pair, float delta_time) {
+        Rigid rigidA = elements.get(pair.idA), rigidB = elements.get(pair.idB);
+        SolverBody solver_bodyA = solver_bodies.get(pair.idA), solver_bodyB = solver_bodies.get(pair.idB);
+        PVector velocityA = rigidA.get_velocity();
+        PVector velocityB = rigidB.get_velocity();
+        PVector relative_vel = PVector.sub(velocityA, velocityB);
+
+        // 反発は新しいペアだけで起こる
+        float restitution = pair.type == PairType.pair_new ? (rigidA.restitution_rate() + rigidB.restitution_rate()) * 0.5 : 0;
+
+        PVector axis = new PVector(pair.contact_normal.x, pair.contact_normal.y).normalize();
+        // 速度補正
+        float rhs = -(1 + restitution) * axis.dot(relative_vel);
+        // 位置補正
+        rhs -= pair.contact_normal.mag() / delta_time;
+        // TODO: 質量を反映
+
+        pair.constraint_contact = Optional.of(new Constraint(axis, rhs));
+
+        float friction = sqrt(rigidA.friction_rate() * rigidB.friction_rate());
+        PVector axis = new PVector(axis.y, -axis.x);
+        rhs = -(1 + restitution) * axis.dot(relative_vel) - pair.contact_normal.mag() / delta_time;
+        pair.constraint_friction = Optional.of(new Constraint(axis, rhs));
     }
 
     private List<Constraint> make_constraints(float delta_time) {
@@ -89,9 +136,8 @@ class World {
     }
 
     public void process_constraints(List<Constraint> constraints) {
-        List<SolverBody> solver_bodies = make_solver_bodies();
         // インパルス法を反復
-        for (int it_num = 0; it_num < 10; it_num++) {
+        for (int it_num = 0; it_num < 50; it_num++) {
             int pair_num = pairs.size();
             for (int pair_i = 0; pair_i < pair_num; pair_i++) {
                 Pair pair = pairs.get(pair_i);
@@ -104,13 +150,14 @@ class World {
         for (int i = 0; i < body_num; i++) {
             WorldElement elem = elements.get(i);
             SolverBody solver_body = solver_bodies.get(i);
-            println(solver_body.delta_velocity);
+            // if (solver_body.delta_velocity.magSq() > 1) println(solver_body.delta_velocity);
             elem.add_velocity(solver_body.delta_velocity);
         }
     }
 
     public void update(float delta_time) {
         update_velocity(delta_time);
+        update_solver_bodies();
         List<Pair> new_pairs = find_pairs();
         merge_pairs(new_pairs);
         List<Constraint> constraints = make_constraints(delta_time);
