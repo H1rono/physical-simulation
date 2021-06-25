@@ -1,6 +1,3 @@
-import java.util.List;
-import java.util.ArrayList;
-
 class World implements Drawable {
     private List<WorldElement> elements;
     private List<RigidRelation> relations;
