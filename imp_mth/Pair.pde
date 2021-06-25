@@ -20,6 +20,15 @@ class Pair {
     public Pair(PairType type, PVector contact_normal, int idA, int idB) {
         this(type, contact_normal, idA, idB, null, null);
     }
+
+    public void eval_constraints(SolverBody solver_bodyA, SolverBody solver_bodyB) {
+        if (constraint_contact.isPresent()) {
+            constraint_contact.get().eval(solver_bodyA, solver_bodyB);
+        }
+        if (constraint_friction.isPresent()) {
+            constraint_friction.get().eval(solver_bodyA, solver_bodyB);
+        }
+    }
 }
 
 public Pair make_pair(Rigid rigidA, Rigid rigidB, int idA, int idB) {

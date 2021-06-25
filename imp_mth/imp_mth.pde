@@ -16,14 +16,14 @@ Ball ball;
 void setup() {
     size(720, 720);
     world = new World(new PVector(0, 10));
-    world.add_element(new Box(
-        new PVector(100, height - 225),
-        new PVector(0, 0),
-        50, 50, 10
-    ));
+    // world.add_element(new Box(
+    //     new PVector(100, height - 225),
+    //     new PVector(0, 0),
+    //     50, 50, 10
+    // ));
     world.add_element(new Box(
         new PVector(100, height - 150),
-        new PVector(10, 0),
+        new PVector(0, 0),
         100, 100, 100
     ));
     // ball = new Ball(

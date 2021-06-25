@@ -118,32 +118,28 @@ class World {
         // 位置補正
         rhs -= pair.contact_normal.mag() / delta_time;
         // TODO: 質量を反映
+        rhs /= (solver_bodyA.mass_inv + solver_bodyB.mass_inv);
 
         pair.constraint_contact = Optional.of(new Constraint(axis, rhs));
 
         float friction = sqrt(rigidA.friction_rate() * rigidB.friction_rate());
-        PVector axis = new PVector(axis.y, -axis.x);
+        axis = new PVector(axis.y, -axis.x);
         rhs = -(1 + restitution) * axis.dot(relative_vel) - pair.contact_normal.mag() / delta_time;
-        pair.constraint_friction = Optional.of(new Constraint(axis, rhs));
+        //pair.constraint_friction = Optional.of(new Constraint(axis, rhs, -friction, friction));
     }
 
-    private List<Constraint> make_constraints(float delta_time) {
-        List<Constraint> result = new ArrayList<Constraint>();
+    private void setup_constraints(float delta_time) {
         for (Pair pair : pairs) {
-            result.add(pair2constraint(pair, delta_time));
+            set_constraint(pair, delta_time);
         }
-        return result;
     }
 
-    public void process_constraints(List<Constraint> constraints) {
+    public void process_constraints() {
         // インパルス法を反復
         for (int it_num = 0; it_num < 50; it_num++) {
-            int pair_num = pairs.size();
-            for (int pair_i = 0; pair_i < pair_num; pair_i++) {
-                Pair pair = pairs.get(pair_i);
-                Constraint constraint = constraints.get(pair_i);
+            for (Pair pair : pairs) {
                 SolverBody sbA = solver_bodies.get(pair.idA), sbB = solver_bodies.get(pair.idB);
-                constraint.eval(sbA, sbB);
+                pair.eval_constraints(sbA, sbB);
             }
         }
         int body_num = elements.size();
@@ -160,8 +156,8 @@ class World {
         update_solver_bodies();
         List<Pair> new_pairs = find_pairs();
         merge_pairs(new_pairs);
-        List<Constraint> constraints = make_constraints(delta_time);
-        process_constraints(constraints);
+        setup_constraints(delta_time);
+        process_constraints();
         for (WorldElement elem : elements) {
             elem.update_center(delta_time);
         }
