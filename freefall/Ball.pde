@@ -8,16 +8,12 @@ class Ball {
     public PVector accelaration, velocity, position;
     public float mass, radius;
 
-    public Ball(PVector _accelaration, PVector _velocity, PVector _position, float _mass, float _radius) {
-        accelaration = _accelaration;
+    public Ball(PVector _position, PVector _velocity, float _mass, float _radius) {
+        accelaration = new PVector(0, 0);
         velocity = _velocity;
         position = _position;
         mass = _mass;
         radius = _radius;
-    }
-
-    public Ball(PVector _velocity, PVector _position, float _mass, float _radius) {
-        this(new PVector(0, 0), _velocity, _position, _mass, _radius);
     }
 
     public PVector get_force() {
