@@ -9,7 +9,7 @@ void setup() {
     world = new World(new PVector(0, 9.8));
     world.add_element(new Ball(
         new PVector(100, 100),
-        100, 10,
+        50, 10,
         new PVector(10, 0), true
     ));
     world.add_element(new Box(

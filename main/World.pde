@@ -104,7 +104,7 @@ class World implements Drawable {
         // 速度補正
         float rhs = -(1 + restitution) * axis.dot(relative_vel);
         // 位置補正
-        rhs -= pair.contact_normal.mag() / delta_time;
+        rhs -= 0.5 * pair.contact_normal.mag() / delta_time;
         rhs *= jac_diag_inv;
         Constraint constraint_rest = new Constraint(axis, rhs, jac_diag_inv);
 
