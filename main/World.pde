@@ -41,7 +41,7 @@ class World implements Drawable {
         // https://qiita.com/drken/items/97e37dd6143e33a64c8c
         // pairsは(rigid_aのid, rigid_bのid)で辞書式にソートされているので、それを利用する
         int ng_index = -1, ok_index = pairs.size();
-        int idA = pair.rigid_a.get_id(), id_a = pair.rigid_b.get_id();
+        int id_a = pair.rigid_a.get_id(), id_b = pair.rigid_b.get_id();
         if (ok_index == 0) {
             return false;
         }
@@ -49,10 +49,10 @@ class World implements Drawable {
             int mid = (ok_index + ng_index) >> 1;
             Pair mid_pair = pairs.get(mid);
             int mid_id_a = mid_pair.rigid_a.get_id(), mid_id_b = mid_pair.rigid_b.get_id();
-            if (mid_id_a == id_a && mid_id_a == id_a) {
+            if (mid_id_a == id_a && mid_id_a == id_b) {
                 return true;
             }
-            if (mid_id_a < id_a || (mid_id_a == id_a && mid_id_a < id_a)) {
+            if (mid_id_a < id_a || (mid_id_a == id_a && mid_id_b < id_b)) {
                 ok_index = mid;
             } else {
                 ng_index = mid;

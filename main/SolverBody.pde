@@ -15,5 +15,5 @@ class SolverBody {
 SolverBody make_solver_body(Rigid rigid) {
     PVector delta_vel = new PVector(0, 0);
     float mass_inv = rigid.get_mass_inv();
-    return new SolverBody(ref_rigid, delta_vel, mass_inv);
+    return new SolverBody(rigid, delta_vel, mass_inv);
 }
