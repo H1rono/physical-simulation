@@ -1,8 +1,27 @@
 class Ball extends Rigid {
-    private PVector center, velocity;
-    private float radius, mass;
+    //! 中心座標
+    private PVector center;
+
+    //! 並進運動の速度
+    private PVector velocity;
+
+    //! 半径
+    private float radius;
+
+    //! 質量
+    private float mass;
+
+    //! 球が動くのかどうか。動かない場合、`add_velocity`メソッド、`move`メソッドによって何も変化しなくなる。
     private boolean movable;
 
+    /**
+     * コンストラクタ
+     * @param center 中心座標
+     * @param radius 半径
+     * @param mass 質量
+     * @param velocity 並進運動の速度
+     * @param movable 動くのかどうか
+     */
     public Ball(PVector center, float radius, float mass, PVector velocity, boolean movable) {
         this.center = center;
         this.radius = radius;
@@ -11,7 +30,7 @@ class Ball extends Rigid {
         this.velocity = velocity;
     }
 
-        @Override
+    @Override
     public PVector support(PVector point) {
         return PVector.add(center, point.copy().normalize().mult(radius));
     }

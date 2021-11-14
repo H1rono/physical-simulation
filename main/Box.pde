@@ -1,11 +1,31 @@
 class Box extends Rigid {
-    //! 中心座標、速度
-    private PVector center, velocity;
-    //! 横幅、縦幅
-    private float w_len, h_len, mass;
-    //! 動くかどうか
+    //! 中心座標
+    private PVector center;
+
+    //! 並進運動の速度
+    private PVector velocity;
+
+    //! 横幅
+    private float w_len;
+
+    //! 縦幅
+    private float h_len;
+
+    //! 質量
+    private float mass;
+
+    //! 動くのかどうか
     private boolean movable;
 
+    /**
+     * コンストラクタ
+     * @param center 中心座標
+     * @param w_len 横幅
+     * @param h_len 縦幅
+     * @param mass 質量
+     * @param velocity 並進運動の速度
+     * @param movable 動くのかどうか
+     */
     public Box(PVector center, float w_len, float h_len, float mass, PVector velocity, boolean movable) {
         this.center = center;
         this.w_len = w_len;

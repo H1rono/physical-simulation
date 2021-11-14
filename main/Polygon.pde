@@ -1,3 +1,6 @@
+import java.util.List;
+import java.util.ArrayList;
+
 // 多角形
 // 凹みを許し、できるだけ辺同士が交差しないように頂点を管理する
 class Polygon {
