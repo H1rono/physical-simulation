@@ -10,14 +10,14 @@
 
 ここでは主要なクラスのみ解説しておく。
 
-クラス/インターフェース名 | 概要
+クラス名 | 概要
 :- | -:
 `class World` | 「物理世界」を表現するクラス
-`interface Rigid` | 「剛体」を表現するインターフェース
+`class Rigid` | 「剛体」を表現する抽象クラス
 `class Ball` | 「球」を表現するクラス
 `class Box` | 「長方形の箱」を表現するクラス
 
-`Ball`クラスと`Box`クラスは`Rigid`を実装したクラスである。抽象的なシミュレーションを見据えて、`World`クラスの`add_element`メソッドで`Rigid`オブジェクトをシミュレーション対象として追加するという方針をとっている。シミュレーションの具体的な内容は`main.pde`内で設定する。
+`Ball`クラスと`Box`クラスは`Rigid`の具象クラスである。一般的なシミュレーションを見据えて、`World`クラスの`add_element`メソッドで`Rigid`オブジェクトをシミュレーション対象として追加するという方針をとった。シミュレーションの具体的な内容は`main.pde`内で設定する。以下は`main.pde`の一例である。
 
 ```java
 // main.pde
@@ -30,13 +30,11 @@ void setup() {
     // スクリーンサイズ
     size(720, 720);
     // World(重力加速度)
-    world = new World(new PVector(0, 9.8));
+    world = new World(new PVector(0, 9.8)); // PVectorはベクトルの型
     // シミュレーションする剛体を追加
     // ここでは球の斜方投射をシミュレーションする剛体設定
     // Ball(中心座標, 半径, 質量, 速度, 動くのかどうか)
-    world.add_element(new Ball(
-        new PVector(50, 100), // PVectorはベクトルの型
-        50, 10, new PVector(10, -10), true));
+    world.add_element(new Ball(new PVector(50, 100), new PVector(10, -10), 50, 10 , true));
 }
 
 void draw() {
@@ -58,11 +56,24 @@ void draw() {
 ### 球のバウンド
 
 ```java
-// Box(中心座標, 横幅, 縦幅, 質量, 速度, 動くのかどうか)
-// 床
-world.add_element(new Box(new PVector(width / 2, height - 50), width, 100, 50, new PVector(0, 0), false));
-world.add_element(new Ball(new PVector(-100, 100), 50, 10, new PVector(10, -10), true));
+world.add_element(new Ball(new PVector(100, 300), new PVector(50, -10), 10, 30, true));
+// Box(中心座標, 速度, 質量, 横幅, 縦幅, 動くのかどうか)
+world.add_element(new Box(new PVector(width / 2.0f, height - 50), new PVector(), 10, width, 100, false));
 ```
+
+以下のような結果となる。
+
+![bounce.png](img/bounce.png)
+
+### 球2個の衝突
+
+```java
+world.add_element(new Ball(new PVector(width / 2, 200), new PVector(), 10, 30, true));
+world.add_element(new Ball(new PVector(width / 2, 500), new PVector(), 10, 30, true));
+world.add_element(new Box(new PVector(width / 2.0f, height - 50), new PVector(), 10, width, 100, false));
+```
+
+![ball2.png](img/ball2.png)
 
 ## まとめ
 
