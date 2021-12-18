@@ -1,8 +1,9 @@
+// 重力加速度
 final PVector gravity = new PVector(0, 9.8);
+// 経過時間
 final float delta_time = 0.05;
-
+// 物理世界
 World world;
-Box box1, box2;
 
 void setup() {
     size(720, 720);

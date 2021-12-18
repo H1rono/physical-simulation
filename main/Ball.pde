@@ -1,9 +1,17 @@
-/* ボールを表現するクラス */
+/** ボールを表現するクラス */
 class Ball extends Rigid {
     private PVector center, velocity;
     private float mass, radius;
     private boolean movable;
 
+    /**
+     * 新たなBallオブジェクトを作成する
+     * @param center 球の中心座標
+     * @param velocity 球の初速度
+     * @param mass 球の質量
+     * @param radius 球の半径
+     * @param movable 球が動くのかどうか
+     */
     public Ball(PVector center, PVector velocity, float mass, float radius, boolean movable) {
         this.center = new PVector();
         this.velocity = new PVector();
@@ -65,20 +73,19 @@ class Ball extends Rigid {
     Effect effect_on(Rigid other, boolean new_collide) {
         PVector dir_e = touching_vector(other.get_center()).normalize().mult(1);
         PVector impulse = new PVector(0, 0);
-        {
-            float this_m = this.get_mass(), other_m = other.get_mass();
-            float this_v = dir_e.dot(velocity);
-            float other_v = dir_e.dot(other.get_velocity());
-            if (other_v - this_v < 0) {
-                float repulsion = new_collide ? (repulsion_factor() + other.repulsion_factor()) / 2 : 0;
-                // 衝突した
-                float im = (
-                    (1 + repulsion/* 反発係数 */)
-                    * (movable ? this_m * other_m / (this_m + other_m) : other_m)
-                    * (this_v - other_v)
-                );
-                impulse.add(dir_e).mult(im);
-            }
+        float this_m = this.get_mass(), other_m = other.get_mass();
+        float this_v = dir_e.dot(velocity);
+        float other_v = dir_e.dot(other.get_velocity());
+        if (other_v - this_v < 0) {
+            // 衝突した
+            // 反発係数
+            float repulsion = new_collide ? (repulsion_factor() + other.repulsion_factor()) / 2 : 0;
+            float im = (
+                (1 + repulsion/* 反発係数 */)
+                * (movable ? this_m * other_m / (this_m + other_m) : other_m)
+                * (this_v - other_v)
+            );
+            impulse.add(dir_e).mult(im);
         }
         return new Effect(this, other, impulse);
     }

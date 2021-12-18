@@ -1,10 +1,18 @@
-// 「箱」を表現するクラス
+/** 箱を表現するクラス */
 class Box extends Rigid {
     private PVector center, velocity;
     private float mass, w_len, h_len; // w_len: 横幅、h_len: 縦幅
     private boolean movable;
 
-    // 適当なコンストラクタ
+    /**
+     * 新たなBoxオブジェクトを作成する
+     * @param center 箱の中心座標
+     * @param velocity 箱の初速度
+     * @param mass 箱の質量
+     * @param w_len 箱の横幅
+     * @param h_len 箱の縦幅
+     * @param movable 箱が動くのかどうか
+     */
     public Box(PVector center, PVector velocity, float mass, float w_len, float h_len, boolean movable) {
         this.center = new PVector();
         this.velocity = new PVector();
@@ -79,7 +87,6 @@ class Box extends Rigid {
         );
     }
 
-    // 「影響」の関数
     @Override
     public Effect effect_on(Rigid other, boolean new_collide) {
         PVector dir_e = touching_vector(other.get_center()).normalize().mult(-1);

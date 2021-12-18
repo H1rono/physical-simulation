@@ -33,8 +33,8 @@ void setup() {
     world = new World(new PVector(0, 9.8)); // PVectorはベクトルの型
     // シミュレーションする剛体を追加
     // ここでは球の斜方投射をシミュレーションする剛体設定
-    // Ball(中心座標, 半径, 質量, 速度, 動くのかどうか)
-    world.add_element(new Ball(new PVector(50, 100), new PVector(10, -10), 50, 10 , true));
+    // Ball(中心座標, 速度, 質量, 半径, 動くのかどうか)
+    world.add_element(new Ball(new PVector(50, 100), new PVector(20, -30), 10, 50, true));
 }
 
 void draw() {
